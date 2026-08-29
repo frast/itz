@@ -1,0 +1,6 @@
+if (outcome != success) of /subsystem=datasources/jdbc-driver=oracle:read-resource
+    /subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle.ojdbc,driver-class-name=oracle.jdbc.OracleDriver)
+end-if
+if (outcome != success) of /subsystem=datasources/data-source=ItzDS:read-resource
+    data-source add --name=ItzDS --jndi-name=java:/jdbc/ItzDS --driver-name=oracle --connection-url="jdbc:oracle:thin:@//${env.ORACLE_HOST}:${env.ORACLE_PORT}/${env.ORACLE_SERVICE}" --user-name="${env.ORACLE_USER}" --password="${env.ORACLE_PASSWORD}" --jta=true --use-java-context=true --enabled=true
+end-if

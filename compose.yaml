@@ -1,0 +1,53 @@
+name: itz
+
+services:
+  oracle:
+    image: oracle/database:19.3.0-ee
+    environment:
+      ORACLE_SID: ORCLCDB
+      ORACLE_PDB: ORCLPDB1
+      ORACLE_PWD: ${ORACLE_PWD:?Set ORACLE_PWD in .env}
+      ORACLE_CHARACTERSET: AL32UTF8
+      ORACLE_EDITION: enterprise
+      ITZ_DB_USER: ${ITZ_DB_USER:?Set ITZ_DB_USER in .env}
+      ITZ_DB_PASSWORD: ${ITZ_DB_PASSWORD:?Set ITZ_DB_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:1521:1521"
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+      - ./db/setup:/opt/oracle/scripts/setup:ro
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'SELECT 1 FROM dual;' | sqlplus -s system/$$ORACLE_PWD@//localhost:1521/ORCLPDB1 | grep -q 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 30
+      start_period: 4m
+
+  eap:
+    build:
+      context: ./bundle/eap
+      args:
+        EAP_BUILDER_IMAGE: ${EAP_BUILDER_IMAGE:-registry.redhat.io/jboss-eap-8/eap81-openjdk21-builder-openshift-rhel9@sha256:ed4244965392a4db27fa869f02cb629ffe5c32eb11c2dba191c16415ef9820dd}
+        EAP_RUNTIME_IMAGE: ${EAP_RUNTIME_IMAGE:-registry.redhat.io/jboss-eap-8/eap81-openjdk21-runtime-openshift-rhel9@sha256:2c6c82f312125c937d9ffe2b98a5efb144b4e436a4e7fbd4b6f119857493c6f3}
+    environment:
+      ORACLE_HOST: oracle
+      ORACLE_PORT: "1521"
+      ORACLE_SERVICE: ORCLPDB1
+      ORACLE_USER: ${ITZ_DB_USER:?Set ITZ_DB_USER in .env}
+      ORACLE_PASSWORD: ${ITZ_DB_PASSWORD:?Set ITZ_DB_PASSWORD in .env}
+      EAP_MGMT_USER: ${EAP_MGMT_USER:?Set EAP_MGMT_USER in .env}
+      EAP_MGMT_PASSWORD: ${EAP_MGMT_PASSWORD:?Set EAP_MGMT_PASSWORD in .env}
+    depends_on:
+      oracle:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/ >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 45s
+
+volumes:
+  oracle-data:

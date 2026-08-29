@@ -1,0 +1,15 @@
+package de.itz.adapter.primary.rest;
+
+import de.itz.application.PingUseCase;
+import de.itz.domain.Ping;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+
+@Path("ping")
+@Produces(MediaType.APPLICATION_JSON)
+public class PingResource {
+    private final PingUseCase useCase = new PingUseCase();
+    @GET public Ping ping() { return useCase.execute(); }
+}

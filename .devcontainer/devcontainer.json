@@ -1,0 +1,31 @@
+{
+  "name": "itz development",
+  "dockerComposeFile": ["../compose.yaml", "../compose.dev.yaml"],
+  "service": "dev",
+  "workspaceFolder": "/workspaces/itz",
+  "shutdownAction": "none",
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "jdkDistro": "tem",
+      "installMaven": true,
+      "mavenVersion": "latest"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": false,
+      "username": "vscode"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "redhat.java",
+        "redhat.vscode-xml",
+        "vmware.vscode-boot-dev-pack"
+      ]
+    }
+  }
+}

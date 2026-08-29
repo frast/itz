@@ -1,0 +1,18 @@
+services:
+  dev:
+    image: mcr.microsoft.com/devcontainers/base:ubuntu-24.04
+    command: sleep infinity
+    volumes:
+      - ./:/workspaces/itz:cached
+      - maven-cache:/home/vscode/.m2
+    working_dir: /workspaces/itz
+    env_file:
+      - .env
+    depends_on:
+      oracle:
+        condition: service_healthy
+      eap:
+        condition: service_started
+
+volumes:
+  maven-cache:

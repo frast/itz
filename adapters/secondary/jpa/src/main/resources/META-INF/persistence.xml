@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.0">
+  <persistence-unit name="itzPU" transaction-type="JTA">
+    <jta-data-source>java:/jdbc/ItzDS</jta-data-source>
+    <properties>
+      <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>
+    </properties>
+  </persistence-unit>
+</persistence>
