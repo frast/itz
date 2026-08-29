@@ -1,33 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent><groupId>de.itz</groupId><artifactId>bundle</artifactId><version>0.1.0-SNAPSHOT</version><relativePath>../pom.xml</relativePath></parent>
-  <artifactId>ear</artifactId><packaging>ear</packaging><name>itz EAR</name>
+  <parent>
+    <groupId>de.itz</groupId>
+    <artifactId>bundle</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>ear</artifactId>
+  <packaging>ear</packaging>
+  <name>itz EAR</name>
   <dependencies>
-    <dependency><groupId>de.itz</groupId><artifactId>rest</artifactId><version>${project.version}</version><type>war</type></dependency>
+    <dependency>
+      <groupId>de.itz</groupId>
+      <artifactId>rest</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
+    </dependency>
   </dependencies>
   <build>
     <finalName>itz</finalName>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId><artifactId>maven-ear-plugin</artifactId><version>3.3.0</version>
-        <configuration><version>8</version><modules><webModule><groupId>de.itz</groupId><artifactId>rest</artifactId><contextRoot>/itz</contextRoot></webModule></modules></configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-ear-plugin</artifactId>
+        <version>3.3.0</version>
+        <executions>
+          <execution>
+            <?m2e execute onConfiguration,onIncremental?>
+            <id>default-generate-application-xml</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>generate-application-xml</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <version>8</version>
+          <modules>
+            <webModule>
+              <groupId>de.itz</groupId>
+              <artifactId>rest</artifactId>
+              <contextRoot>/itz</contextRoot>
+            </webModule>
+          </modules>
+        </configuration>
       </plugin>
     </plugins>
   </build>
   <profiles>
     <profile>
       <id>deploy-eap</id>
-      <build><plugins><plugin>
-        <groupId>org.wildfly.plugins</groupId><artifactId>wildfly-maven-plugin</artifactId><version>${wildfly.maven.plugin.version}</version>
-        <configuration>
-          <hostname>${eap.host}</hostname><port>${eap.port}</port>
-          <username>${env.EAP_MGMT_USER}</username><password>${env.EAP_MGMT_PASSWORD}</password>
-          <filename>${project.build.finalName}.ear</filename><force>true</force>
-        </configuration>
-        <executions><execution><id>deploy-to-local-eap</id><phase>install</phase><goals><goal>deploy</goal></goals></execution></executions>
-      </plugin></plugins></build>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.wildfly.plugins</groupId>
+            <artifactId>wildfly-maven-plugin</artifactId>
+            <version>${wildfly.maven.plugin.version}</version>
+            <configuration>
+              <hostname>${eap.host}</hostname>
+              <port>${eap.port}</port>
+              <username>${env.EAP_MGMT_USER}</username>
+              <password>${env.EAP_MGMT_PASSWORD}</password>
+              <filename>${project.build.finalName}.ear</filename>
+              <force>true</force>
+            </configuration>
+            <executions>
+              <execution>
+                <id>deploy-to-local-eap</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>deploy</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
-  <properties><eap.host>eap</eap.host><eap.port>9990</eap.port></properties>
+  <properties>
+    <eap.host>eap</eap.host>
+    <eap.port>9990</eap.port>
+  </properties>
 </project>

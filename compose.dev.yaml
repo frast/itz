@@ -1,6 +1,9 @@
 services:
   dev:
-    image: mcr.microsoft.com/devcontainers/base:ubuntu-24.04
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    user: vscode
     command: sleep infinity
     volumes:
       - ./:/workspaces/itz:cached
