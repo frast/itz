@@ -4,3 +4,7 @@ end-if
 if (outcome != success) of /subsystem=datasources/data-source=ItzDS:read-resource
     data-source add --name=ItzDS --jndi-name=java:/jdbc/ItzDS --driver-name=oracle --connection-url="jdbc:oracle:thin:@//${env.ORACLE_HOST}:${env.ORACLE_PORT}/${env.ORACLE_SERVICE}" --user-name="${env.ORACLE_USER}" --password="${env.ORACLE_PASSWORD}" --jta=true --use-java-context=true --enabled=true
 end-if
+if (result == false) of /core-service=management/management-interface=http-interface:read-attribute(name=console-enabled)
+    /core-service=management/management-interface=http-interface:write-attribute(name=console-enabled,value=true)
+    :reload
+end-if

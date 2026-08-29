@@ -42,8 +42,11 @@ services:
         condition: service_healthy
     ports:
       - "8080:8080"
+      - "127.0.0.1:9990:9990"
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/ >/dev/null"]
+      # /management returns 401 without credentials; that still proves that
+      # the management interface is accepting requests.
+      test: ["CMD-SHELL", "curl -sS -o /dev/null http://localhost:9990/management"]
       interval: 15s
       timeout: 5s
       retries: 20

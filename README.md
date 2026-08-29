@@ -19,6 +19,11 @@ Lokale Experimentierumgebung mit JBoss EAP 8.1, Oracle Database 19c und VS Code 
 
 Die Anwendung ist danach unter http://localhost:8080/itz/api/ping erreichbar.
 
+Die lokale EAP-Management-Konsole ist unter http://localhost:9990/console
+erreichbar. Die Zugangsdaten sind `EAP_MGMT_USER` und `EAP_MGMT_PASSWORD` aus
+der lokalen Datei `.env`. Der Port ist bewusst nur an `127.0.0.1` gebunden und
+nicht im lokalen Netzwerk veroeffentlicht.
+
 ## Datenbankmodus
 
 Das lokale Persistence-Unit-Profil nutzt `drop-and-create`: Bei jedem EAP-Start wird das Anwendungsschema aus den JPA-Entities neu erzeugt. Die Datenbankdaten selbst liegen in einem Docker Named Volume. Fuer einen vollstaendigen Reset verwenden Sie `docker compose down -v`.

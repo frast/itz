@@ -3,21 +3,26 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>de.itz</groupId>
-        <artifactId>adapters</artifactId>
+        <artifactId>itz-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>jpa</artifactId>
+    <artifactId>webapp</artifactId>
+    <packaging>war</packaging>
+    <name>itz web application</name>
     <dependencies>
         <dependency>
             <groupId>de.itz</groupId>
-            <artifactId>domain</artifactId>
+            <artifactId>rest</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
-            <scope>provided</scope>
+            <groupId>de.itz</groupId>
+            <artifactId>jpa</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
+    <build>
+        <finalName>itz-rest</finalName>
+    </build>
 </project>

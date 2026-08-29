@@ -15,7 +15,7 @@
   <dependencies>
     <dependency>
       <groupId>de.itz</groupId>
-      <artifactId>rest</artifactId>
+      <artifactId>webapp</artifactId>
       <version>${project.version}</version>
       <type>war</type>
     </dependency>
@@ -26,23 +26,19 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-ear-plugin</artifactId>
-        <version>3.3.0</version>
+        <version>3.4.0</version>
         <executions>
           <execution>
-            <?m2e execute onConfiguration,onIncremental?>
+            <?m2e ignore?>
             <id>default-generate-application-xml</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>generate-application-xml</goal>
-            </goals>
           </execution>
         </executions>
         <configuration>
-          <version>8</version>
+          <version>10</version>
           <modules>
             <webModule>
               <groupId>de.itz</groupId>
-              <artifactId>rest</artifactId>
+              <artifactId>webapp</artifactId>
               <contextRoot>/itz</contextRoot>
             </webModule>
           </modules>

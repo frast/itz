@@ -8,7 +8,6 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>rest</artifactId>
-    <packaging>war</packaging>
     <dependencies>
         <dependency>
             <groupId>de.itz</groupId>
@@ -16,18 +15,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>de.itz</groupId>
-            <artifactId>jpa</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.platform</groupId>
-            <artifactId>jakarta.jakartaee-api</artifactId>
-            <version>${jakartaee.version}</version>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
-    <build>
-        <finalName>itz-rest</finalName>
-    </build>
 </project>
