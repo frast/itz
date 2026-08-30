@@ -5,9 +5,12 @@ services:
       dockerfile: .devcontainer/Dockerfile
     user: vscode
     command: sleep infinity
+    security_opt:
+      - "seccomp=unconfined"
     volumes:
       - ./:/workspaces/itz:cached
       - maven-cache:/home/vscode/.m2
+      - codex-data:/home/vscode/.codex
     working_dir: /workspaces/itz
     env_file:
       - .env
@@ -19,3 +22,4 @@ services:
 
 volumes:
   maven-cache:
+  codex-data:

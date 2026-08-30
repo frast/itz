@@ -24,7 +24,8 @@
         "vscjava.vscode-java-pack",
         "redhat.java",
         "redhat.vscode-xml",
-        "vmware.vscode-boot-dev-pack"
+        "vmware.vscode-boot-dev-pack",
+        "openai.chatgpt"
       ]
     }
   }
