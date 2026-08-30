@@ -9,20 +9,9 @@ import jakarta.inject.Inject;
 
 @RequestScoped
 public class PingResource implements PingApi {
-    private final PingUseCase useCase;
-
-    /**
-     * Do not use or remove this constructor, it is only for the framework to create an instance of this class. Use the
-     * constructor with the PingUseCase parameter instead.
-     */
-    public PingResource() {
-        useCase = null;
-    }
 
     @Inject
-    public PingResource(PingUseCase useCase) {
-        this.useCase = useCase;
-    }
+    private PingUseCase useCase;
 
     @Override
     public PingResponse ping() {
