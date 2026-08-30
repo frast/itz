@@ -26,6 +26,7 @@
         "redhat.java",
         "redhat.vscode-xml",
         "vmware.vscode-boot-dev-pack",
+        "humao.rest-client",
         "openai.chatgpt"
       ]
     }

@@ -38,7 +38,7 @@ Bei späteren Starts genügt `docker compose up -d`. Danach kann ein Access Toke
 angefordert werden:
 
 ```bash
-token=$(curl -sS -X POST http://localhost:8180/realms/itz/protocol/openid-connect/token \
+token=$(curl -sS -X POST http://keycloak:8080/realms/itz/protocol/openid-connect/token \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode 'client_id=itz-api' \
   --data-urlencode 'username=itz-user' \
@@ -57,6 +57,17 @@ werden.
 
 Das importierte Realm wird nur beim ersten Initialisieren des persistenten
 Keycloak-Volumes wirksam.
+
+## REST-Requests in VS Code
+
+Der Dev Container installiert die Erweiterung **REST Client**. Die Requests
+liegen in [requests/requests.http](requests/requests.http) und können dort über
+`Send Request` einzeln ausgeführt werden. Der erste Request holt ein Token und
+speichert es automatisch für den geschützten Ping.
+
+Für die Token-Anfrage müssen `ITZ_TEST_USERNAME` und `ITZ_TEST_PASSWORD` aus
+`.env.example` in die lokale `.env` übernommen werden. Diese Werte werden über
+`{{$dotenv ...}}` gelesen und nicht in `requests.http` gespeichert.
 
 ## REST-API und OpenAPI
 
