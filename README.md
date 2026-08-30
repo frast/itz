@@ -19,6 +19,24 @@ Lokale Experimentierumgebung mit JBoss EAP 8.1, Oracle Database 19c und VS Code 
 
 Die Anwendung ist danach unter http://localhost:8080/itz/api/ping erreichbar.
 
+## REST-API und OpenAPI
+
+Der REST-Vertrag liegt unter
+`adapters/primary/rest/src/main/openapi/openapi.yaml`. Das Maven-Plugin
+`openapi-generator-maven-plugin` erzeugt daraus waehrend der Phase
+`generate-sources` Jakarta-JAX-RS-Interfaces und validierte Transportmodelle im
+Verzeichnis `adapters/primary/rest/target/generated-sources/openapi`.
+
+Generierter Code wird nicht eingecheckt und nicht manuell bearbeitet. Die
+REST-Resources implementieren die generierten Interfaces und bilden explizit
+zwischen den OpenAPI-Transportmodellen und den Domain-Typen ab.
+
+Nach einer Aenderung am Vertrag kann die Generierung gezielt ausgefuehrt werden:
+
+```bash
+./mvnw -pl adapters/primary/rest -am generate-sources
+```
+
 Der eingecheckte Maven Wrapper verwendet Maven 3.9.11. Die Datei
 `.mvn/settings.xml` ordnet die lokalen Management-Zugangsdaten aus
 `EAP_MGMT_USER` und `EAP_MGMT_PASSWORD` der Maven-Server-ID `local-eap` zu;
