@@ -16,6 +16,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PingResponse"
+        "401":
+          description: Authentifizierung ist erforderlich
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Berechtigung zum Ausfuehren der Operation fehlt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     PingResponse:
@@ -26,3 +38,15 @@ components:
         message:
           type: string
           example: pong
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: FORBIDDEN
+        message:
+          type: string
+          example: The current user is not allowed to perform this operation

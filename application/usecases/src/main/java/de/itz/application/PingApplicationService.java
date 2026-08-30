@@ -2,8 +2,8 @@ package de.itz.application;
 
 import de.itz.application.security.CurrentUser;
 import de.itz.application.security.CurrentUserContext;
+import de.itz.application.security.ForbiddenException;
 import de.itz.application.security.Permission;
-import de.itz.application.security.UnauthorizedException;
 import de.itz.domain.Ping;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -21,7 +21,7 @@ public class PingApplicationService implements PingUseCase {
     public Ping execute() {
         CurrentUser user = currentUserContext.currentUser();
         if (!user.hasPermission(Permission.PING)) {
-            throw new UnauthorizedException("The current user is not allowed to ping");
+            throw new ForbiddenException("The current user is not allowed to ping");
         }
         return Ping.alive();
     }
