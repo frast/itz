@@ -110,7 +110,7 @@
         <configuration>
           <java>
             <eclipse>
-              <version>4.36</version>
+              <version>4.37</version>
               <file>${maven.multiModuleProjectDirectory}/config/java-formatter.xml</file>
             </eclipse>
             <trimTrailingWhitespace/>

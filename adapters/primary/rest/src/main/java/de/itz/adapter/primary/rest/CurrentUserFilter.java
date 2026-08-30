@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 import de.itz.application.security.CurrentUser;
 import de.itz.application.security.Permission;
 import jakarta.annotation.Priority;
-import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
