@@ -32,7 +32,8 @@
   "roles": {
     "realm": [
       { "name": "user", "description": "Local API user" },
-      { "name": "admin", "description": "Local API administrator" }
+      { "name": "admin", "description": "Local API administrator" },
+      { "name": "special", "description": "May invoke the ping use case" }
     ]
   },
   "users": [
@@ -61,6 +62,19 @@
         { "type": "password", "value": "itz-admin", "temporary": false }
       ],
       "realmRoles": ["user", "admin"]
+    },
+    {
+      "username": "itz-special",
+      "enabled": true,
+      "firstName": "ITZ",
+      "lastName": "Special",
+      "email": "itz-special@localhost",
+      "emailVerified": true,
+      "requiredActions": [],
+      "credentials": [
+        { "type": "password", "value": "itz-special", "temporary": false }
+      ],
+      "realmRoles": ["user", "special"]
     }
   ]
 }

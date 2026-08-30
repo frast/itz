@@ -24,8 +24,10 @@ API erwartet einen gültigen JWT-Bearer-Token aus dem lokalen Keycloak.
 
 Keycloak wird für die lokale Entwicklung automatisch aus
 `config/keycloak/itz-realm.json` importiert. Der Realm `itz` enthält den Client
-`itz-api`, die Testbenutzer `itz-user` und `itz-admin` sowie die Rollen `user`
-und `admin`. Diese Zugangsdaten sind ausschließlich für lokale Tests gedacht.
+`itz-api`, die Testbenutzer `itz-user`, `itz-admin` und `itz-special` sowie die
+Rollen `user`, `admin` und `special`. Nur `itz-special` besitzt die
+Berechtigung für den Ping-Use-Case; dafür ist keine Admin-Rolle erforderlich.
+Diese Zugangsdaten sind ausschließlich für lokale Tests gedacht.
 
 Nach dem ersten Hinzufügen oder Ändern der EAP-OIDC-Konfiguration muss das
 EAP-Image neu gebaut werden:

@@ -77,6 +77,9 @@ bundle            --> adapters (composition and deployment only)
 - Favor small cohesive classes, constructor injection, immutable state, and explicit
   return types. Avoid field injection, service locators, global mutable state, and
   nullable values as implicit control flow.
+- Field injection is permitted only for REST controllers/resources where the framework
+  supplies the controller dependency; all other application and adapter components must
+  use constructor injection (or an explicit framework callback such as `@Context`).
 - Keep methods focused. Extract a concept when it has a domain name or removes genuine
   duplication; do not create abstractions for a single speculative future use.
 - Use exceptions for exceptional failures, not expected branching. Map domain and
@@ -124,6 +127,10 @@ Run the narrowest useful check first, then the repository-level check before han
 mvn -pl <changed-module> -am test
 mvn verify
 ```
+
+Every implementation change must be verified with Maven, and the relevant build and
+tests must finish successfully before handoff. Do not report an implementation as
+complete when the Maven build or tests are failing.
 
 For packaging changes also run:
 
