@@ -24,6 +24,9 @@
     <version.maven.enforcer.plugin>3.6.2</version.maven.enforcer.plugin>
     <version.maven.surefire.plugin>3.5.3</version.maven.surefire.plugin>
     <version.openapi-generator-maven-plugin>7.24.0</version.openapi-generator-maven-plugin>
+    <version.error-prone>2.50.0</version.error-prone>
+    <version.jspecify>1.0.1</version.jspecify>
+    <version.nullaway>0.14.0</version.nullaway>
     <version.maven.war.plugin>3.5.1</version.maven.war.plugin>
     <spotless-maven-plugin.version>3.8.0</spotless-maven-plugin.version>
     <version.wildfly.maven.plugin>6.0.1.Final</version.wildfly.maven.plugin>
@@ -72,6 +75,11 @@
         <groupId>org.jboss.weld</groupId>
         <artifactId>weld-junit5</artifactId>
         <version>${version.weld.junit5}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jspecify</groupId>
+        <artifactId>jspecify</artifactId>
+        <version>${version.jspecify}</version>
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
@@ -167,6 +175,24 @@
           <version>${version.maven.compiler.plugin}</version>
           <configuration>
             <release>${maven.compiler.release}</release>
+            <compilerArgs>
+              <arg>-XDcompilePolicy=simple</arg>
+              <arg>--should-stop=ifError=FLOW</arg>
+              <arg>-XDaddTypeAnnotationsToSymbol=true</arg>
+              <arg>-Xplugin:ErrorProne -XepDisableAllChecks -Xep:NullAway:ERROR -Xep:RequireExplicitNullMarking:ERROR -XepOpt:NullAway:OnlyNullMarked=true -XepOpt:NullAway:ExcludedFieldAnnotations=jakarta.inject.Inject,jakarta.ws.rs.core.Context -XepExcludedPaths:.*/target/generated-sources/.*</arg>
+            </compilerArgs>
+            <annotationProcessorPaths>
+              <path>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_core</artifactId>
+                <version>${version.error-prone}</version>
+              </path>
+              <path>
+                <groupId>com.uber.nullaway</groupId>
+                <artifactId>nullaway</artifactId>
+                <version>${version.nullaway}</version>
+              </path>
+            </annotationProcessorPaths>
           </configuration>
         </plugin>
         <plugin>

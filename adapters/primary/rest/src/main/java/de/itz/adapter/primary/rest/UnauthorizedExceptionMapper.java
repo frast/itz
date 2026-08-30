@@ -10,6 +10,7 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 public class UnauthorizedExceptionMapper implements ExceptionMapper<UnauthorizedException> {
     @Override
+    @SuppressWarnings("null") // JDT cannot derive nullness from the unannotated JAX-RS contract.
     public Response toResponse(UnauthorizedException exception) {
         ErrorResponse error = new ErrorResponse("UNAUTHORIZED", "Authentication is required");
         return buildResponse(Response.Status.UNAUTHORIZED, MediaType.APPLICATION_JSON_TYPE, error);

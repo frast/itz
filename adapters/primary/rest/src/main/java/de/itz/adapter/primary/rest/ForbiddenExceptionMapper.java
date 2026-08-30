@@ -10,6 +10,7 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 public class ForbiddenExceptionMapper implements ExceptionMapper<ForbiddenException> {
     @Override
+    @SuppressWarnings("null") // JDT cannot derive nullness from the unannotated JAX-RS contract.
     public Response toResponse(ForbiddenException exception) {
         ErrorResponse error = new ErrorResponse(
                 "FORBIDDEN", "The current user is not allowed to perform this operation");

@@ -8,4 +8,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>itz-domain</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+        </dependency>
+    </dependencies>
 </project>

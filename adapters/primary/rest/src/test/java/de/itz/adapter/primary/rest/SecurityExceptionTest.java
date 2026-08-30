@@ -18,24 +18,25 @@ import jakarta.ws.rs.core.Response;
 class SecurityExceptionTest {
     @Test
     void mapsUnauthorizedExceptionToStableResponse() {
-        CapturingUnauthorizedExceptionMapper mapper = new CapturingUnauthorizedExceptionMapper();
+        UnauthorizedExceptionMapper mapper = new UnauthorizedExceptionMapper();
 
-        mapper.toResponse(new UnauthorizedException("Sensitive internal detail"));
+        Response response = mapper.toResponse(new UnauthorizedException("Sensitive internal detail"));
 
-        assertEquals(Response.Status.UNAUTHORIZED, mapper.status);
-        assertEquals(MediaType.APPLICATION_JSON_TYPE, mapper.mediaType);
-        assertError(mapper.error, "UNAUTHORIZED", "Authentication is required");
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
+        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+        assertError((ErrorResponse) response.getEntity(), "UNAUTHORIZED", "Authentication is required");
     }
 
     @Test
     void mapsForbiddenExceptionToStableResponse() {
-        CapturingForbiddenExceptionMapper mapper = new CapturingForbiddenExceptionMapper();
+        ForbiddenExceptionMapper mapper = new ForbiddenExceptionMapper();
 
-        mapper.toResponse(new ForbiddenException("Sensitive internal detail"));
+        Response response = mapper.toResponse(new ForbiddenException("Sensitive internal detail"));
 
-        assertEquals(Response.Status.FORBIDDEN, mapper.status);
-        assertEquals(MediaType.APPLICATION_JSON_TYPE, mapper.mediaType);
-        assertError(mapper.error, "FORBIDDEN", "The current user is not allowed to perform this operation");
+        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
+        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+        assertError((ErrorResponse) response.getEntity(), "FORBIDDEN",
+                "The current user is not allowed to perform this operation");
     }
 
     @Test
@@ -56,33 +57,5 @@ class SecurityExceptionTest {
     private void assertError(ErrorResponse error, String expectedCode, String expectedMessage) {
         assertEquals(expectedCode, error.getCode());
         assertEquals(expectedMessage, error.getMessage());
-    }
-
-    private static final class CapturingUnauthorizedExceptionMapper extends UnauthorizedExceptionMapper {
-        private Response.Status status;
-        private MediaType mediaType;
-        private ErrorResponse error;
-
-        @Override
-        Response buildResponse(Response.Status status, MediaType mediaType, ErrorResponse error) {
-            this.status = status;
-            this.mediaType = mediaType;
-            this.error = error;
-            return null;
-        }
-    }
-
-    private static final class CapturingForbiddenExceptionMapper extends ForbiddenExceptionMapper {
-        private Response.Status status;
-        private MediaType mediaType;
-        private ErrorResponse error;
-
-        @Override
-        Response buildResponse(Response.Status status, MediaType mediaType, ErrorResponse error) {
-            this.status = status;
-            this.mediaType = mediaType;
-            this.error = error;
-            return null;
-        }
     }
 }

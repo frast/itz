@@ -1,5 +1,7 @@
 {
   "java.configuration.updateBuildConfiguration": "automatic",
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.settings.url": "${workspaceFolder}/config/java-settings.prefs",
   "java.format.settings.url": "${workspaceFolder}/config/java-formatter.xml",
   "java.format.settings.profile": "itz",
   "java.diagnostic.filter": [

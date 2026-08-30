@@ -1,5 +1,6 @@
 package de.itz.adapter.primary.rest;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,6 +15,7 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.ext.Provider;
+import org.jspecify.annotations.Nullable;
 
 @Provider
 @Priority(Priorities.AUTHENTICATION)
@@ -22,17 +24,19 @@ public class CurrentUserFilter implements ContainerRequestFilter {
     private RequestCurrentUserContext currentUserContext;
 
     @Context
-    private SecurityContext securityContext;
+    private @Nullable SecurityContext securityContext;
 
     @Override
+    @SuppressWarnings("null") // JDT cannot model JAX-RS overrides and nullness of legacy external APIs.
     public void filter(ContainerRequestContext requestContext) {
+        SecurityContext context = Objects.requireNonNull(securityContext, "JAX-RS SecurityContext was not injected");
         Set<String> roles = Stream.of("user", "admin", "special")
-                .filter(securityContext::isUserInRole)
+                .filter(context::isUserInRole)
                 .collect(Collectors.toUnmodifiableSet());
-        Set<Permission> permissions = securityContext.isUserInRole("special")
+        Set<Permission> permissions = context.isUserInRole("special")
                 ? Set.of(Permission.PING)
                 : Set.of();
         currentUserContext.setCurrentUser(new CurrentUser(
-                securityContext.getUserPrincipal().getName(), roles, permissions));
+                context.getUserPrincipal().getName(), roles, permissions));
     }
 }

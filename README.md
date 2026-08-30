@@ -115,6 +115,26 @@ Formatierung waehrend der `verify`-Phase.
 ./mvnw verify          # Vollstaendiger Build inklusive Formatierungspruefung
 ```
 
+## Nullness-Pruefung
+
+Eigener Java-Code ist paketweise mit JSpecify `@NullMarked` als standardmaessig
+nicht-null markiert. Nur Typen, fuer die `null` ein gueltiger Zustand ist, werden
+explizit mit `@Nullable` annotiert; `@NonNull` wird nicht verwendet.
+
+VS Code aktiviert die annotationsbasierte Null-Analyse automatisch. Maven prueft
+Produktions- und Testcode bei jeder Kompilierung verbindlich mit NullAway. Die vom
+OpenAPI Generator erzeugten Quellen unter `target/generated-sources` sind davon
+ausgenommen und bleiben bewusst unmarkiert.
+
+Eclipse JDT ignoriert dabei nur ungepruefte Nullness-Konvertierungen aus externen,
+nicht JSpecify-annotierten APIs. Eindeutige Nullzugriffe und Nullness-Vertragsverletzungen
+werden weiterhin als Java-Diagnosen angezeigt; die vollstaendige Build-Pruefung uebernimmt
+NullAway.
+
+```bash
+./mvnw verify  # inklusive NullAway-Pruefung
+```
+
 ## Datenbankmodus
 
 Das lokale Persistence-Unit-Profil nutzt `drop-and-create`: Bei jedem EAP-Start wird das Anwendungsschema aus den JPA-Entities neu erzeugt. Die Datenbankdaten selbst liegen in einem Docker Named Volume. Fuer einen vollstaendigen Reset verwenden Sie `docker compose down -v`.

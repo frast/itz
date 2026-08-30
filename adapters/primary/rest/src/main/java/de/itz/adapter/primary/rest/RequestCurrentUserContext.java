@@ -4,10 +4,11 @@ import de.itz.application.security.CurrentUser;
 import de.itz.application.security.CurrentUserContext;
 import de.itz.application.security.UnauthorizedException;
 import jakarta.enterprise.context.RequestScoped;
+import org.jspecify.annotations.Nullable;
 
 @RequestScoped
 public class RequestCurrentUserContext implements CurrentUserContext {
-    private CurrentUser currentUser;
+    private @Nullable CurrentUser currentUser;
 
     public void setCurrentUser(CurrentUser currentUser) {
         this.currentUser = currentUser;
