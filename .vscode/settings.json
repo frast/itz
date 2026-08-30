@@ -2,6 +2,9 @@
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.format.settings.url": "${workspaceFolder}/config/java-formatter.xml",
   "java.format.settings.profile": "itz",
+  "java.diagnostic.filter": [
+    "**/target/generated-sources/openapi/**"
+  ],
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
