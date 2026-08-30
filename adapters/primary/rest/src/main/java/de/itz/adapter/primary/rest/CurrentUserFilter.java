@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import de.itz.application.security.CurrentUser;
-import de.itz.application.security.Permission;
 import de.itz.domain.security.Role;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
@@ -38,10 +37,6 @@ public class CurrentUserFilter implements ContainerRequestFilter {
         Set<Role> roles = Stream.of(Role.values())
                 .filter(role -> context.isUserInRole(role.externalName()))
                 .collect(Collectors.toUnmodifiableSet());
-        Set<Permission> permissions = roles.contains(Role.SPECIAL)
-                ? Set.of(Permission.PING)
-                : Set.of();
-        currentUserContext.initialize(new CurrentUser(
-                principalName, roles, permissions));
+        currentUserContext.initialize(new CurrentUser(principalName, roles));
     }
 }

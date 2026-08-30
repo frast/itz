@@ -11,7 +11,6 @@ import de.itz.adapter.primary.rest.generated.model.PingResponse;
 import de.itz.application.PingApplicationService;
 import de.itz.application.security.CurrentUser;
 import de.itz.application.security.CurrentUserContext;
-import de.itz.application.security.Permission;
 import de.itz.domain.security.Role;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -29,7 +28,7 @@ class PingResourceTest {
     @org.junit.jupiter.api.BeforeEach
     void authenticatedSpecialUser() {
         ((RequestCurrentUserContext) currentUserContext).initialize(new CurrentUser(
-                "special-user", java.util.Set.of(Role.USER, Role.SPECIAL), java.util.Set.of(Permission.PING)));
+                "special-user", java.util.Set.of(Role.USER, Role.SPECIAL)));
     }
 
     @Test

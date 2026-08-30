@@ -30,7 +30,7 @@ class SecurityExceptionTest {
 
     @Test
     void rejectsUserWithoutPingPermissionAsForbidden() {
-        CurrentUser currentUser = new CurrentUser("regular-user", Set.of(Role.USER), Set.of());
+        CurrentUser currentUser = new CurrentUser("regular-user", Set.of(Role.USER));
         PingApplicationService service = new PingApplicationService(() -> currentUser);
 
         assertThrows(ForbiddenException.class, service::execute);
@@ -46,10 +46,10 @@ class SecurityExceptionTest {
     @Test
     void rejectsReplacingCurrentUser() {
         RequestCurrentUserContext currentUserContext = new RequestCurrentUserContext();
-        currentUserContext.initialize(new CurrentUser("first-user", Set.of(Role.USER), Set.of()));
+        currentUserContext.initialize(new CurrentUser("first-user", Set.of(Role.USER)));
 
         assertThrows(IllegalStateException.class,
-                () -> currentUserContext.initialize(new CurrentUser("second-user", Set.of(Role.ADMIN), Set.of())));
+                () -> currentUserContext.initialize(new CurrentUser("second-user", Set.of(Role.ADMIN))));
     }
 
     private void assertError(ErrorResponse error, String expectedCode, String expectedMessage) {
