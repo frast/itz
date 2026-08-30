@@ -11,22 +11,10 @@ import de.itz.adapter.primary.rest.generated.model.ErrorResponse;
 import de.itz.application.PingApplicationService;
 import de.itz.application.security.CurrentUser;
 import de.itz.application.security.ForbiddenException;
-import de.itz.application.security.UnauthorizedException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 class SecurityExceptionTest {
-    @Test
-    void mapsUnauthorizedExceptionToStableResponse() {
-        UnauthorizedExceptionMapper mapper = new UnauthorizedExceptionMapper();
-
-        Response response = mapper.toResponse(new UnauthorizedException("Sensitive internal detail"));
-
-        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
-        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
-        assertError((ErrorResponse) response.getEntity(), "UNAUTHORIZED", "Authentication is required");
-    }
-
     @Test
     void mapsForbiddenExceptionToStableResponse() {
         ForbiddenExceptionMapper mapper = new ForbiddenExceptionMapper();
@@ -48,10 +36,10 @@ class SecurityExceptionTest {
     }
 
     @Test
-    void rejectsMissingRequestUserAsUnauthorized() {
+    void reportsUninitializedRequestUserContext() {
         RequestCurrentUserContext currentUserContext = new RequestCurrentUserContext();
 
-        assertThrows(UnauthorizedException.class, currentUserContext::currentUser);
+        assertThrows(IllegalStateException.class, currentUserContext::currentUser);
     }
 
     private void assertError(ErrorResponse error, String expectedCode, String expectedMessage) {

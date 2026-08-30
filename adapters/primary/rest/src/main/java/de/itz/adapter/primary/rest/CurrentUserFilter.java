@@ -1,5 +1,6 @@
 package de.itz.adapter.primary.rest;
 
+import java.security.Principal;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,6 +31,9 @@ public class CurrentUserFilter implements ContainerRequestFilter {
     @SuppressWarnings("null") // JDT cannot model JAX-RS overrides and nullness of legacy external APIs.
     public void filter(ContainerRequestContext requestContext) {
         SecurityContext context = Objects.requireNonNull(securityContext, "JAX-RS SecurityContext was not injected");
+        Principal principal = Objects.requireNonNull(context.getUserPrincipal(),
+                "Authenticated request has no user principal");
+        String principalName = Objects.requireNonNull(principal.getName(), "Authenticated user principal has no name");
         Set<String> roles = Stream.of("user", "admin", "special")
                 .filter(context::isUserInRole)
                 .collect(Collectors.toUnmodifiableSet());
@@ -37,6 +41,6 @@ public class CurrentUserFilter implements ContainerRequestFilter {
                 ? Set.of(Permission.PING)
                 : Set.of();
         currentUserContext.setCurrentUser(new CurrentUser(
-                context.getUserPrincipal().getName(), roles, permissions));
+                principalName, roles, permissions));
     }
 }

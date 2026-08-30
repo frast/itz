@@ -2,7 +2,6 @@ package de.itz.adapter.primary.rest;
 
 import de.itz.application.security.CurrentUser;
 import de.itz.application.security.CurrentUserContext;
-import de.itz.application.security.UnauthorizedException;
 import jakarta.enterprise.context.RequestScoped;
 import org.jspecify.annotations.Nullable;
 
@@ -17,7 +16,7 @@ public class RequestCurrentUserContext implements CurrentUserContext {
     @Override
     public CurrentUser currentUser() {
         if (currentUser == null) {
-            throw new UnauthorizedException("No authenticated user in the current request");
+            throw new IllegalStateException("Current user context was not initialized for this request");
         }
         return currentUser;
     }
