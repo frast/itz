@@ -7,19 +7,17 @@
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>webapp</artifactId>
+    <artifactId>itz-webapp</artifactId>
     <packaging>war</packaging>
     <name>itz web application</name>
     <dependencies>
         <dependency>
             <groupId>de.itz</groupId>
-            <artifactId>rest</artifactId>
-            <version>${project.version}</version>
+            <artifactId>itz-rest-adapter</artifactId>
         </dependency>
         <dependency>
             <groupId>de.itz</groupId>
-            <artifactId>jpa</artifactId>
-            <version>${project.version}</version>
+            <artifactId>itz-jpa-adapter</artifactId>
         </dependency>
     </dependencies>
     <build>

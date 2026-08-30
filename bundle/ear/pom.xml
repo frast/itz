@@ -9,14 +9,13 @@
     <version>0.1.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>ear</artifactId>
+  <artifactId>itz-ear</artifactId>
   <packaging>ear</packaging>
   <name>itz EAR</name>
   <dependencies>
     <dependency>
       <groupId>de.itz</groupId>
-      <artifactId>webapp</artifactId>
-      <version>${project.version}</version>
+      <artifactId>itz-webapp</artifactId>
       <type>war</type>
     </dependency>
   </dependencies>
@@ -26,7 +25,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-ear-plugin</artifactId>
-        <version>3.4.0</version>
         <executions>
           <execution>
             <?m2e ignore?>
@@ -35,10 +33,12 @@
         </executions>
         <configuration>
           <version>10</version>
+          <generateApplicationXml>true</generateApplicationXml>
           <modules>
             <webModule>
               <groupId>de.itz</groupId>
-              <artifactId>webapp</artifactId>
+              <artifactId>itz-webapp</artifactId>
+              <bundleFileName>itz-rest.war</bundleFileName>
               <contextRoot>/itz</contextRoot>
             </webModule>
           </modules>
@@ -54,12 +54,10 @@
           <plugin>
             <groupId>org.wildfly.plugins</groupId>
             <artifactId>wildfly-maven-plugin</artifactId>
-            <version>${wildfly.maven.plugin.version}</version>
             <configuration>
+              <id>local-eap</id>
               <hostname>${eap.host}</hostname>
               <port>${eap.port}</port>
-              <username>${env.EAP_MGMT_USER}</username>
-              <password>${env.EAP_MGMT_PASSWORD}</password>
               <filename>${project.build.finalName}.ear</filename>
               <force>true</force>
             </configuration>

@@ -15,9 +15,14 @@ Lokale Experimentierumgebung mit JBoss EAP 8.1, Oracle Database 19c und VS Code 
 2. Bei Red Hat anmelden: `docker login registry.redhat.io`.
 3. Das lokale Oracle-Image erstellen: `./scripts/build-oracle-image.sh /pfad/LINUX.X64_193000_db_home.zip`.
 4. In VS Code den Ordner oeffnen und **Dev Containers: Reopen in Container** waehlen.
-5. Im Dev Container starten: `mvn -pl bundle/ear -am -Pdeploy-eap install`.
+5. Im Dev Container starten: `./mvnw -pl bundle/ear -am -Pdeploy-eap install`.
 
 Die Anwendung ist danach unter http://localhost:8080/itz/api/ping erreichbar.
+
+Der eingecheckte Maven Wrapper verwendet Maven 3.9.11. Die Datei
+`.mvn/settings.xml` ordnet die lokalen Management-Zugangsdaten aus
+`EAP_MGMT_USER` und `EAP_MGMT_PASSWORD` der Maven-Server-ID `local-eap` zu;
+Kennwoerter werden nicht in Maven-Dateien gespeichert.
 
 Die Kommandohistorien von Bash und Zsh liegen in einem Docker Named Volume und
 bleiben bei einem Rebuild des Dev Containers erhalten. `docker compose down -v`
@@ -35,9 +40,9 @@ VS Code formatiert Java-Dateien beim Speichern mit dem eingecheckten Profil
 Formatierung waehrend der `verify`-Phase.
 
 ```bash
-mvn spotless:check  # Formatierung pruefen
-mvn spotless:apply  # Formatierung korrigieren
-mvn verify          # Vollstaendiger Build inklusive Formatierungspruefung
+./mvnw spotless:check  # Formatierung pruefen
+./mvnw spotless:apply  # Formatierung korrigieren
+./mvnw verify          # Vollstaendiger Build inklusive Formatierungspruefung
 ```
 
 ## Datenbankmodus
@@ -53,6 +58,10 @@ Pruefsumme des Oracle-19c-Installers sind festgelegt. Ein frischer Neuaufbau
 besteht aus `docker compose down -v`, dem Oracle-Image-Build und
 `docker compose up -d --build`. `down -v` loescht dabei bewusst alle lokalen
 Oracle-Daten; es wird nie automatisch ausgefuehrt.
+
+Der EAP-Channel `eap-8.1:1.7.1.GA-redhat-00001` und der Maven-BOM
+`8.1.7.GA-redhat-00004` gehoeren zum selben EAP-8.1.7-Patchstand und muessen
+bei einem EAP-Update gemeinsam aktualisiert werden.
 
 ## Sicherheit und Lizenzen
 

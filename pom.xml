@@ -15,9 +15,15 @@
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jboss-eap.version>8.1.7.GA-redhat-00004</jboss-eap.version>
+    <project.build.outputTimestamp>2026-08-30T00:00:00Z</project.build.outputTimestamp>
+    <version.jboss.eap>8.1.7.GA-redhat-00004</version.jboss.eap>
+    <version.maven.compiler.plugin>3.14.0</version.maven.compiler.plugin>
+    <version.maven.ear.plugin>3.4.0</version.maven.ear.plugin>
+    <version.maven.enforcer.plugin>3.6.2</version.maven.enforcer.plugin>
+    <version.maven.surefire.plugin>3.5.3</version.maven.surefire.plugin>
+    <version.maven.war.plugin>3.5.1</version.maven.war.plugin>
     <spotless-maven-plugin.version>3.8.0</spotless-maven-plugin.version>
-    <wildfly.maven.plugin.version>6.0.1.Final</wildfly.maven.plugin.version>
+    <version.wildfly.maven.plugin>6.0.1.Final</version.wildfly.maven.plugin>
   </properties>
   <repositories>
     <repository>
@@ -31,14 +37,52 @@
       </snapshots>
     </repository>
   </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>redhat-ga-maven-repository</id>
+      <url>https://maven.repository.redhat.com/ga/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.jboss.bom</groupId>
         <artifactId>jboss-eap-ee-with-tools</artifactId>
-        <version>${jboss-eap.version}</version>
+        <version>${version.jboss.eap}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>itz-domain</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>itz-usecases</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>itz-rest-adapter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>itz-jpa-adapter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>itz-webapp</artifactId>
+        <version>${project.version}</version>
+        <type>war</type>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -69,13 +113,38 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${version.maven.enforcer.plugin}</version>
+        <executions>
+          <execution>
+            <id>enforce-build</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>[21,22)</version>
+                </requireJavaVersion>
+                <requireMavenVersion>
+                  <version>[3.9,)</version>
+                </requireMavenVersion>
+                <banDuplicatePomDependencyVersions/>
+                <dependencyConvergence/>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.14.0</version>
+          <version>${version.maven.compiler.plugin}</version>
           <configuration>
             <release>${maven.compiler.release}</release>
           </configuration>
@@ -83,15 +152,25 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-war-plugin</artifactId>
-          <version>3.5.1</version>
+          <version>${version.maven.war.plugin}</version>
           <configuration>
             <failOnMissingWebXml>false</failOnMissingWebXml>
           </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-ear-plugin</artifactId>
+          <version>${version.maven.ear.plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.5.3</version>
+          <version>${version.maven.surefire.plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.wildfly.plugins</groupId>
+          <artifactId>wildfly-maven-plugin</artifactId>
+          <version>${version.wildfly.maven.plugin}</version>
         </plugin>
       </plugins>
     </pluginManagement>
