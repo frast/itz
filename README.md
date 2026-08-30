@@ -17,7 +17,46 @@ Lokale Experimentierumgebung mit JBoss EAP 8.1, Oracle Database 19c und VS Code 
 4. In VS Code den Ordner oeffnen und **Dev Containers: Reopen in Container** waehlen.
 5. Im Dev Container starten: `./mvnw -pl bundle/ear -am -Pdeploy-eap install`.
 
-Die Anwendung ist danach unter http://localhost:8080/itz/api/ping erreichbar.
+Die Anwendung ist danach unter http://localhost:8080/itz/api/ping erreichbar. Die
+API erwartet einen gültigen JWT-Bearer-Token aus dem lokalen Keycloak.
+
+## Lokale JWT-Authentifizierung
+
+Keycloak wird für die lokale Entwicklung automatisch aus
+`config/keycloak/itz-realm.json` importiert. Der Realm `itz` enthält den Client
+`itz-api`, die Testbenutzer `itz-user` und `itz-admin` sowie die Rollen `user`
+und `admin`. Diese Zugangsdaten sind ausschließlich für lokale Tests gedacht.
+
+Nach dem ersten Hinzufügen oder Ändern der EAP-OIDC-Konfiguration muss das
+EAP-Image neu gebaut werden:
+
+```bash
+docker compose up -d --build eap
+```
+
+Bei späteren Starts genügt `docker compose up -d`. Danach kann ein Access Token
+angefordert werden:
+
+```bash
+token=$(curl -sS -X POST http://localhost:8180/realms/itz/protocol/openid-connect/token \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'client_id=itz-api' \
+  --data-urlencode 'username=itz-user' \
+  --data-urlencode 'password=itz-user' \
+  --data-urlencode 'grant_type=password' | jq -r .access_token)
+curl -i http://localhost:8080/itz/api/ping -H "Authorization: Bearer ${token}"
+```
+
+Ohne Token oder mit einem ungültigen/abgelaufenen Token antwortet die API mit
+`401 Unauthorized`. Die API ist standardmäßig geschützt; öffentliche Endpunkte
+müssen ausdrücklich als solche konfiguriert werden. Sobald ein Endpunkt eine
+Rolle verlangt, führt ein gültiger Token ohne diese Rolle zu `403 Forbidden`.
+Die Rollen aus Keycloak werden bereits als Jakarta-Sicherheitsrollen verfügbar
+gemacht und können später beispielsweise mit `@RolesAllowed("admin")` geprüft
+werden.
+
+Das importierte Realm wird nur beim ersten Initialisieren des persistenten
+Keycloak-Volumes wirksam.
 
 ## REST-API und OpenAPI
 

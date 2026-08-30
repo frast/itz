@@ -1,0 +1,66 @@
+{
+  "realm": "itz",
+  "enabled": true,
+  "sslRequired": "NONE",
+  "clients": [
+    {
+      "clientId": "itz-api",
+      "name": "ITZ API (local development)",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "protocolMappers": [
+        {
+          "name": "itz-api audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "itz-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "attributes": {
+        "access.token.claim": "true"
+      }
+    }
+  ],
+  "roles": {
+    "realm": [
+      { "name": "user", "description": "Local API user" },
+      { "name": "admin", "description": "Local API administrator" }
+    ]
+  },
+  "users": [
+    {
+      "username": "itz-user",
+      "enabled": true,
+      "firstName": "ITZ",
+      "lastName": "User",
+      "email": "itz-user@localhost",
+      "emailVerified": true,
+      "requiredActions": [],
+      "credentials": [
+        { "type": "password", "value": "itz-user", "temporary": false }
+      ],
+      "realmRoles": ["user"]
+    },
+    {
+      "username": "itz-admin",
+      "enabled": true,
+      "firstName": "ITZ",
+      "lastName": "Admin",
+      "email": "itz-admin@localhost",
+      "emailVerified": true,
+      "requiredActions": [],
+      "credentials": [
+        { "type": "password", "value": "itz-admin", "temporary": false }
+      ],
+      "realmRoles": ["user", "admin"]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "provider-url": "http://keycloak:8080/realms/itz",
+  "ssl-required": "none",
+  "client-id": "itz-api",
+  "public-client": true,
+  "bearer-only": true,
+  "verify-token-audience": true,
+  "principal-attribute": "preferred_username",
+  "confidential-port": 0
+}

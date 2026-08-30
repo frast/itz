@@ -3,7 +3,7 @@ ARG EAP_RUNTIME_IMAGE=registry.redhat.io/jboss-eap-8/eap81-openjdk21-runtime-ope
 
 FROM ${EAP_BUILDER_IMAGE} AS eap-builder
 ENV GALLEON_PROVISION_FEATURE_PACKS=org.jboss.eap:wildfly-ee-galleon-pack
-ENV GALLEON_PROVISION_LAYERS=jaxrs-server,web-console
+ENV GALLEON_PROVISION_LAYERS=jaxrs-server,web-console,elytron-oidc-client
 ENV GALLEON_PROVISION_CHANNELS=org.jboss.eap.channels:eap-8.1:1.7.1.GA-redhat-00001
 RUN /usr/local/s2i/assemble
 

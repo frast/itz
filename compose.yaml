@@ -1,6 +1,18 @@
 name: itz
 
 services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.3
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:?Set KEYCLOAK_ADMIN in .env}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Set KEYCLOAK_ADMIN_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:8180:8080"
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+      - ./config/keycloak:/opt/keycloak/data/import:ro
+
   oracle:
     image: oracle/database:19.3.0-ee
     environment:
@@ -38,6 +50,8 @@ services:
       EAP_MGMT_USER: ${EAP_MGMT_USER:?Set EAP_MGMT_USER in .env}
       EAP_MGMT_PASSWORD: ${EAP_MGMT_PASSWORD:?Set EAP_MGMT_PASSWORD in .env}
     depends_on:
+      keycloak:
+        condition: service_started
       oracle:
         condition: service_healthy
     ports:
@@ -54,3 +68,4 @@ services:
 
 volumes:
   oracle-data:
+  keycloak-data:
