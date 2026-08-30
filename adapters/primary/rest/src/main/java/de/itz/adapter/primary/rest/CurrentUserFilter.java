@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import de.itz.application.security.CurrentUser;
 import de.itz.application.security.Permission;
+import de.itz.domain.security.Role;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Priorities;
@@ -34,10 +35,10 @@ public class CurrentUserFilter implements ContainerRequestFilter {
         Principal principal = Objects.requireNonNull(context.getUserPrincipal(),
                 "Authenticated request has no user principal");
         String principalName = Objects.requireNonNull(principal.getName(), "Authenticated user principal has no name");
-        Set<String> roles = Stream.of("user", "admin", "special")
-                .filter(context::isUserInRole)
+        Set<Role> roles = Stream.of(Role.values())
+                .filter(role -> context.isUserInRole(role.externalName()))
                 .collect(Collectors.toUnmodifiableSet());
-        Set<Permission> permissions = context.isUserInRole("special")
+        Set<Permission> permissions = roles.contains(Role.SPECIAL)
                 ? Set.of(Permission.PING)
                 : Set.of();
         currentUserContext.initialize(new CurrentUser(

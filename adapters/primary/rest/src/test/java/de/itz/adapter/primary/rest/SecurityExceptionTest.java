@@ -11,6 +11,7 @@ import de.itz.adapter.primary.rest.generated.model.ErrorResponse;
 import de.itz.application.PingApplicationService;
 import de.itz.application.security.CurrentUser;
 import de.itz.application.security.ForbiddenException;
+import de.itz.domain.security.Role;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -29,7 +30,7 @@ class SecurityExceptionTest {
 
     @Test
     void rejectsUserWithoutPingPermissionAsForbidden() {
-        CurrentUser currentUser = new CurrentUser("regular-user", Set.of("user"), Set.of());
+        CurrentUser currentUser = new CurrentUser("regular-user", Set.of(Role.USER), Set.of());
         PingApplicationService service = new PingApplicationService(() -> currentUser);
 
         assertThrows(ForbiddenException.class, service::execute);
@@ -45,10 +46,10 @@ class SecurityExceptionTest {
     @Test
     void rejectsReplacingCurrentUser() {
         RequestCurrentUserContext currentUserContext = new RequestCurrentUserContext();
-        currentUserContext.initialize(new CurrentUser("first-user", Set.of("user"), Set.of()));
+        currentUserContext.initialize(new CurrentUser("first-user", Set.of(Role.USER), Set.of()));
 
         assertThrows(IllegalStateException.class,
-                () -> currentUserContext.initialize(new CurrentUser("second-user", Set.of("admin"), Set.of())));
+                () -> currentUserContext.initialize(new CurrentUser("second-user", Set.of(Role.ADMIN), Set.of())));
     }
 
     private void assertError(ErrorResponse error, String expectedCode, String expectedMessage) {
