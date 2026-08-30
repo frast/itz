@@ -21,5 +21,8 @@ public class PingResource {
     public PingResource(PingUseCase useCase) {
         this.useCase = useCase;
     }
-    @GET public Ping ping() { return useCase.execute(); }
+    @GET
+    public Ping ping() {
+        return useCase.execute();
+    }
 }

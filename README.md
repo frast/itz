@@ -24,6 +24,18 @@ erreichbar. Die Zugangsdaten sind `EAP_MGMT_USER` und `EAP_MGMT_PASSWORD` aus
 der lokalen Datei `.env`. Der Port ist bewusst nur an `127.0.0.1` gebunden und
 nicht im lokalen Netzwerk veroeffentlicht.
 
+## Codeformatierung
+
+VS Code formatiert Java-Dateien beim Speichern mit dem eingecheckten Profil
+`config/java-formatter.xml`. Maven verwendet dasselbe Profil und prueft die
+Formatierung waehrend der `verify`-Phase.
+
+```bash
+mvn spotless:check  # Formatierung pruefen
+mvn spotless:apply  # Formatierung korrigieren
+mvn verify          # Vollstaendiger Build inklusive Formatierungspruefung
+```
+
 ## Datenbankmodus
 
 Das lokale Persistence-Unit-Profil nutzt `drop-and-create`: Bei jedem EAP-Start wird das Anwendungsschema aus den JPA-Entities neu erzeugt. Die Datenbankdaten selbst liegen in einem Docker Named Volume. Fuer einen vollstaendigen Reset verwenden Sie `docker compose down -v`.

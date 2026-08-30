@@ -1,6 +1,7 @@
 .env
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
 **/target/
 .mvn/wrapper/maven-wrapper.jar
 .oracle/

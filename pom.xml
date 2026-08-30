@@ -16,6 +16,7 @@
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jboss-eap.version>8.1.7.GA-redhat-00004</jboss-eap.version>
+    <spotless-maven-plugin.version>3.8.0</spotless-maven-plugin.version>
     <wildfly.maven.plugin.version>6.0.1.Final</wildfly.maven.plugin.version>
   </properties>
   <repositories>
@@ -42,6 +43,33 @@
     </dependencies>
   </dependencyManagement>
   <build>
+    <plugins>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless-maven-plugin.version}</version>
+        <configuration>
+          <java>
+            <eclipse>
+              <version>4.36</version>
+              <file>${maven.multiModuleProjectDirectory}/config/java-formatter.xml</file>
+            </eclipse>
+            <trimTrailingWhitespace/>
+            <endWithNewline/>
+          </java>
+        </configuration>
+        <executions>
+          <execution>
+            <?m2e ignore?>
+            <id>check-formatting</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
     <pluginManagement>
       <plugins>
         <plugin>
