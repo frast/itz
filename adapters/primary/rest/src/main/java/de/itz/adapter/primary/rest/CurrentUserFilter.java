@@ -40,7 +40,7 @@ public class CurrentUserFilter implements ContainerRequestFilter {
         Set<Permission> permissions = context.isUserInRole("special")
                 ? Set.of(Permission.PING)
                 : Set.of();
-        currentUserContext.setCurrentUser(new CurrentUser(
+        currentUserContext.initialize(new CurrentUser(
                 principalName, roles, permissions));
     }
 }

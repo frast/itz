@@ -27,7 +27,7 @@ class PingResourceTest {
 
     @org.junit.jupiter.api.BeforeEach
     void authenticatedSpecialUser() {
-        ((RequestCurrentUserContext) currentUserContext).setCurrentUser(new CurrentUser(
+        ((RequestCurrentUserContext) currentUserContext).initialize(new CurrentUser(
                 "special-user", java.util.Set.of("user", "special"), java.util.Set.of(Permission.PING)));
     }
 

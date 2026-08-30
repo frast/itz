@@ -42,6 +42,15 @@ class SecurityExceptionTest {
         assertThrows(IllegalStateException.class, currentUserContext::currentUser);
     }
 
+    @Test
+    void rejectsReplacingCurrentUser() {
+        RequestCurrentUserContext currentUserContext = new RequestCurrentUserContext();
+        currentUserContext.initialize(new CurrentUser("first-user", Set.of("user"), Set.of()));
+
+        assertThrows(IllegalStateException.class,
+                () -> currentUserContext.initialize(new CurrentUser("second-user", Set.of("admin"), Set.of())));
+    }
+
     private void assertError(ErrorResponse error, String expectedCode, String expectedMessage) {
         assertEquals(expectedCode, error.getCode());
         assertEquals(expectedMessage, error.getMessage());

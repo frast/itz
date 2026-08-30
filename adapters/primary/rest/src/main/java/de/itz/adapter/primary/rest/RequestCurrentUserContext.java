@@ -1,5 +1,7 @@
 package de.itz.adapter.primary.rest;
 
+import java.util.Objects;
+
 import de.itz.application.security.CurrentUser;
 import de.itz.application.security.CurrentUserContext;
 import jakarta.enterprise.context.RequestScoped;
@@ -9,8 +11,11 @@ import org.jspecify.annotations.Nullable;
 public class RequestCurrentUserContext implements CurrentUserContext {
     private @Nullable CurrentUser currentUser;
 
-    public void setCurrentUser(CurrentUser currentUser) {
-        this.currentUser = currentUser;
+    void initialize(CurrentUser currentUser) {
+        if (this.currentUser != null) {
+            throw new IllegalStateException("Current user context was already initialized for this request");
+        }
+        this.currentUser = Objects.requireNonNull(currentUser, "currentUser");
     }
 
     @Override
