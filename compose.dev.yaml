@@ -11,6 +11,7 @@ services:
       - ./:/workspaces/itz:cached
       - maven-cache:/home/vscode/.m2
       - codex-data:/home/vscode/.codex
+      - command-history:/commandhistory
     working_dir: /workspaces/itz
     env_file:
       - .env
@@ -23,3 +24,4 @@ services:
 volumes:
   maven-cache:
   codex-data:
+  command-history:

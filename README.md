@@ -19,6 +19,10 @@ Lokale Experimentierumgebung mit JBoss EAP 8.1, Oracle Database 19c und VS Code 
 
 Die Anwendung ist danach unter http://localhost:8080/itz/api/ping erreichbar.
 
+Die Kommandohistorien von Bash und Zsh liegen in einem Docker Named Volume und
+bleiben bei einem Rebuild des Dev Containers erhalten. `docker compose down -v`
+loescht dieses Volume zusammen mit den anderen lokalen Daten.
+
 Die lokale EAP-Management-Konsole ist unter http://localhost:9990/console
 erreichbar. Die Zugangsdaten sind `EAP_MGMT_USER` und `EAP_MGMT_PASSWORD` aus
 der lokalen Datei `.env`. Der Port ist bewusst nur an `127.0.0.1` gebunden und
