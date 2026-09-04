@@ -15,7 +15,7 @@ Lokale Experimentierumgebung mit JBoss EAP 8.1, Oracle Database 19c und VS Code 
 2. Bei Red Hat anmelden: `docker login registry.redhat.io`.
 3. Das lokale Oracle-Image erstellen: `./scripts/build-oracle-image.sh /pfad/LINUX.X64_193000_db_home.zip`.
 4. In VS Code den Ordner oeffnen und **Dev Containers: Reopen in Container** waehlen.
-5. Im Dev Container starten: `./mvnw -pl bundle/ear -am -Pdeploy-eap install`.
+5. Im Dev Container starten: `./mvnw -s .mvn/settings.xml -pl bundle/ear -am -Pdeploy-eap install`.
 
 Die Anwendung ist danach unter http://localhost:8080/itz/api/ping erreichbar. Die
 API erwartet einen gültigen JWT-Bearer-Token aus dem lokalen Keycloak.
@@ -91,7 +91,9 @@ Nach einer Aenderung am Vertrag kann die Generierung gezielt ausgefuehrt werden:
 
 Der eingecheckte Maven Wrapper verwendet Maven 3.9.11. Die Datei
 `.mvn/settings.xml` ordnet die lokalen Management-Zugangsdaten aus
-`EAP_MGMT_USER` und `EAP_MGMT_PASSWORD` der Maven-Server-ID `local-eap` zu;
+`EAP_MGMT_USER` und `EAP_MGMT_PASSWORD` der Maven-Server-ID `local-eap` zu.
+Sie wird nur beim lokalen Deployment explizit mit `-s .mvn/settings.xml` verwendet,
+damit normale Builds weiterhin benutzerspezifische Maven-Mirrors und Proxies nutzen.
 Kennwoerter werden nicht in Maven-Dateien gespeichert.
 
 Die Kommandohistorien von Bash und Zsh liegen in einem Docker Named Volume und
