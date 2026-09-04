@@ -138,7 +138,7 @@ For packaging changes also run:
 mvn -pl bundle/ear -am package
 ```
 
-Use `mvn -pl bundle/ear -am -Pdeploy-eap install` only when a running local EAP stack and
+Use `mvn -s .mvn/settings.xml -pl bundle/ear -am -Pdeploy-eap install` only when a running local EAP stack and
 valid local credentials are available. Do not start containers, deploy, reset Oracle, or
 run `docker compose down -v` unless the task requires it; `down -v` destroys local data.
 
