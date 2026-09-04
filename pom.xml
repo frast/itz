@@ -152,7 +152,7 @@
                   <version>[21,22)</version>
                 </requireJavaVersion>
                 <requireMavenVersion>
-                  <version>[3.9,)</version>
+                  <version>[3.9.11,4)</version>
                 </requireMavenVersion>
                 <banDuplicatePomDependencyVersions/>
                 <dependencyConvergence/>
