@@ -80,6 +80,7 @@
         <groupId>org.jspecify</groupId>
         <artifactId>jspecify</artifactId>
         <version>${version.jspecify}</version>
+        <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
