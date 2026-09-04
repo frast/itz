@@ -10,7 +10,7 @@
       "version": "21",
       "jdkDistro": "tem",
       "installMaven": true,
-      "mavenVersion": "latest"
+      "mavenVersion": "3.9.11"
     },
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/common-utils:2": {
