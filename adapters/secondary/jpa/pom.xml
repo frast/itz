@@ -14,7 +14,7 @@
             <artifactId>jspecify</artifactId>
         </dependency>
         <dependency>
-            <groupId>de.itz</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>itz-domain</artifactId>
         </dependency>
         <dependency>
