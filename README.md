@@ -153,6 +153,14 @@ Der EAP-Channel `eap-8.1:1.7.1.GA-redhat-00001` und der Maven-BOM
 `8.1.7.GA-redhat-00004` gehoeren zum selben EAP-8.1.7-Patchstand und muessen
 bei einem EAP-Update gemeinsam aktualisiert werden.
 
+Maven verwendet lokal einen stabilen Fallback-Zeitstempel fuer reproduzierbare
+Archive. Fuer Release- und CI-Artefakte kann der Zeitstempel automatisch aus
+dem aktuellen Commit abgeleitet werden:
+
+```bash
+SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) ./mvnw verify
+```
+
 ## Sicherheit und Lizenzen
 
 `.env`, Oracle-Installer, erzeugte Datenbank-Images und lokale Build-Artefakte werden nicht eingecheckt. Oracle 19c darf nur im Rahmen der fuer Sie geltenden Entwicklungs-/Testlizenz verwendet werden.
