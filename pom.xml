@@ -252,4 +252,17 @@
       </plugins>
     </pluginManagement>
   </build>
+  <profiles>
+    <profile>
+      <id>source-date-epoch</id>
+      <activation>
+        <property>
+          <name>env.SOURCE_DATE_EPOCH</name>
+        </property>
+      </activation>
+      <properties>
+        <project.build.outputTimestamp>${env.SOURCE_DATE_EPOCH}</project.build.outputTimestamp>
+      </properties>
+    </profile>
+  </profiles>
 </project>
