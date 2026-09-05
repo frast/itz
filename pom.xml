@@ -28,7 +28,7 @@
     <version.maven.ear.plugin>3.4.0</version.maven.ear.plugin>
     <version.maven.enforcer.plugin>3.6.2</version.maven.enforcer.plugin>
     <version.maven.surefire.plugin>3.5.3</version.maven.surefire.plugin>
-    <version.openapi-generator-maven-plugin>7.24.0</version.openapi-generator-maven-plugin>
+    <version.openapi-generator-maven-plugin>7.25.0</version.openapi-generator-maven-plugin>
     <version.error-prone>2.50.0</version.error-prone>
     <version.jspecify>1.0.1</version.jspecify>
     <version.nullaway>0.14.0</version.nullaway>
