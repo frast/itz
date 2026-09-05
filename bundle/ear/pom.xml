@@ -11,7 +11,6 @@
   </parent>
   <artifactId>itz-ear</artifactId>
   <packaging>ear</packaging>
-  <name>itz EAR</name>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
