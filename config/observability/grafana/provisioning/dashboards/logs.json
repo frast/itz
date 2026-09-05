@@ -89,7 +89,7 @@
         },
         {
           "refId": "B",
-          "expr": "{environment=\"development\", service_name=~\"${service:regex}\", log_source=~\"${source:regex}\", level=~\"${level:regex}\"} |~ \"${search:regex}\"",
+          "expr": "{environment=\"development\", service_name=\"oracle\", log_source=~\"${source:regex}\"} |~ \"${search:regex}\"",
           "queryType": "range"
         }
       ],

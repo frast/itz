@@ -35,7 +35,7 @@ curl -fsS --max-time 10 "$grafana_url/api/dashboards/uid/itz-logs" |
         (.dashboard.panels[0].targets[0].expr | contains("service_name=~") and
             contains("log_source=~") and contains("level=~") and
             contains("request_id=\\\"mdc[\\\\"request.id\\\"]\\\"") and contains("${request_id:regex}")) and
-        (.dashboard.panels[0].targets[1].expr | contains("|~ "))
+        (.dashboard.panels[0].targets[1].expr | contains("service_name=\\\"oracle\\\"") and contains("|~ "))
     ' >/dev/null
 
 marker="itz-observability-smoke-$(date +%s)-$$"

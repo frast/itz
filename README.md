@@ -131,7 +131,7 @@ Das Dashboard bietet Filter fuer Service, Source (`container`, `oracle_alert`,
 wird aus dem verschachtelten JSON-Feld `mdc["request.id"]` extrahiert. EAP- und
 Keycloak-Streams werden dafuer separat als JSON geparst; fehlerhafte JSON-Zeilen
 werden aus dieser Abfrage mit `__error__=""` ausgeschlossen. Oracle-Streams werden
-in einer zweiten Abfrage als Plaintext behandelt und erzeugen deshalb keinen
+in einer zweiten, auf Oracle beschraenkten Abfrage als Plaintext behandelt und erzeugen deshalb keinen
 `JSONParserErr`. Die freie Text search wird
 als escaped Regex in einer LogQL-Line-Filterung verwendet; fuer komplexe LogQL-Ausdruecke
 Grafana Explore verwenden.
