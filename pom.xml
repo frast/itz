@@ -34,7 +34,7 @@
     <version.jspecify>1.0.1</version.jspecify>
     <version.nullaway>0.14.0</version.nullaway>
     <version.maven.war.plugin>3.5.1</version.maven.war.plugin>
-    <spotless-maven-plugin.version>3.8.0</spotless-maven-plugin.version>
+    <spotless-maven-plugin.version>3.10.2</spotless-maven-plugin.version>
     <version.wildfly.maven.plugin>6.0.1.Final</version.wildfly.maven.plugin>
   </properties>
   <repositories>
