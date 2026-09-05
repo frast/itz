@@ -126,6 +126,11 @@ deshalb die Docker-Befehle im Host-Terminal ausfuehren.
 
 Dashboard: http://localhost:3000/d/itz-logs
 
+Das Dashboard bietet Filter fuer Service, Source (`container`, `oracle_alert`,
+`oracle_listener`), Level und eine freie Text search. Bei einer freien Text search
+werden Anfuehrungszeichen als Literal behandelt; fuer komplexe LogQL-Ausdruecke
+Grafana Explore verwenden.
+
 Grafana erlaubt lokal anonymen Lesezugriff ohne Anmeldung; es wird kein initialer
 Admin angelegt. Datenquelle und Dashboard werden ueber Dateien verwaltet.
 Port 3000 ist nur an `127.0.0.1` gebunden, Loki und Alloy veroeffentlichen keine
@@ -154,7 +159,7 @@ Unstrukturierte Startskript-Ausgaben und Oracle-Logs bleiben als Text erhalten,
 auch wenn sie kein gueltiges JSON sind. Alte Textlogs werden nicht nachtraeglich
 umgewandelt und haben kein von Alloy erfasstes `level`-Label.
 Zusaetzlich liest Alloy Oracle-Alert- und Listener-Dateien aus dem gemeinsamen
-Diagnose-Volume (Aktivierung siehe unten). Browserfehler sind noch keine Quelle.
+Diagnose-Volume (Aktivierung siehe unten). Browserfehler sind noch keine Source.
 
 Loki speichert Daten in `loki-data` und loescht Logs nach sieben Tagen asynchron
 ueber den Compactor. `alloy-data` bewahrt Lesepositionen und `grafana-data` den
@@ -260,7 +265,7 @@ Den Fehler beheben und das Skript wiederholen oder den vorhandenen Container mit
 nicht mit `up` neu erstellen. Das Skript setzt weder die Datenbank zurueck noch
 loescht es Volumes.
 
-Die erfassten Quellen lassen sich in Grafana getrennt abfragen:
+Die erfassten Sources lassen sich in Grafana getrennt abfragen:
 
 ```logql
 {service_name="oracle", log_source="oracle_alert"}
@@ -274,7 +279,7 @@ werden nicht eingesammelt. Das Label `filename` zeigt die Quelldatei. Alert-Zeil
 werden ab einer ISO-Zeitstempelzeile zusammengefasst, maximal 256 Zeilen je Eintrag;
 Listener-Ausgaben bleiben zeilenweise erhalten. Das Oracle-Image gibt das Alert-Log
 auch auf der Konsole aus: Dieselbe Meldung kann deshalb unter `container` und
-`oracle_alert` vorkommen. Fuer Auswertungen eine Quelle auswaehlen.
+`oracle_alert` vorkommen. Fuer Auswertungen eine Source auswaehlen.
 
 Beim erstmaligen Entdecken wird eine Datei ab Anfang eingelesen, danach setzt
 Alloy anhand der Lesepositionen in `alloy-data` fort. Der Loki-Zeitstempel ist bei

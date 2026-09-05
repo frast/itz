@@ -2,7 +2,7 @@
   "uid": "itz-logs",
   "title": "ITZ Container Logs",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "editable": false,
   "refresh": "10s",
   "time": { "from": "now-15m", "to": "now" },
@@ -24,19 +24,60 @@
           { "text": "oracle", "value": "oracle", "selected": false }
         ]
       }
+      ,{
+        "name": "source",
+        "label": "Source",
+        "type": "custom",
+        "query": "container,oracle_alert,oracle_listener",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": { "text": "All", "value": "$__all" },
+        "options": [
+          { "text": "All", "value": "$__all", "selected": true },
+          { "text": "container", "value": "container", "selected": false },
+          { "text": "oracle_alert", "value": "oracle_alert", "selected": false },
+          { "text": "oracle_listener", "value": "oracle_listener", "selected": false }
+        ]
+      },
+      {
+        "name": "level",
+        "label": "Level",
+        "type": "custom",
+        "query": "DEBUG,INFO,WARN,ERROR,FATAL",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": { "text": "All", "value": "$__all" },
+        "options": [
+          { "text": "All", "value": "$__all", "selected": true },
+          { "text": "DEBUG", "value": "DEBUG", "selected": false },
+          { "text": "INFO", "value": "INFO", "selected": false },
+          { "text": "WARN", "value": "WARN", "selected": false },
+          { "text": "ERROR", "value": "ERROR", "selected": false },
+          { "text": "FATAL", "value": "FATAL", "selected": false }
+        ]
+      },
+      {
+        "name": "search",
+        "label": "Text search",
+        "type": "textbox",
+        "query": "",
+        "current": { "text": "", "value": "" }
+      }
     ]
   },
   "panels": [
     {
       "id": 1,
-      "title": "Container-Ausgaben",
+      "title": "Container logs",
       "type": "logs",
       "datasource": { "type": "loki", "uid": "loki" },
       "gridPos": { "h": 22, "w": 24, "x": 0, "y": 0 },
       "targets": [
         {
           "refId": "A",
-          "expr": "{environment=\"development\", service_name=~\"${service:regex}\"}",
+          "expr": "{environment=\"development\", service_name=~\"${service:regex}\", log_source=~\"${source:regex}\", level=~\"${level:regex}\"} |= \"${search:doublequote}\"",
           "queryType": "range"
         }
       ],
