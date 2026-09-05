@@ -22,5 +22,15 @@
     </dependencies>
     <build>
         <finalName>itz-rest</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                    <!-- This module contains no bytecode; its dependencies are WAR packaging inputs. -->
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>
