@@ -156,6 +156,12 @@
             </goals>
             <configuration>
               <failOnWarning>true</failOnWarning>
+              <ignoredUnusedDeclaredDependencies>
+                <!-- Loaded by Surefire through the JUnit Platform provider. -->
+                <ignoredUnusedDeclaredDependency>org.junit.jupiter:junit-jupiter-engine</ignoredUnusedDeclaredDependency>
+                <!-- Supplies the Jakarta REST RuntimeDelegate during adapter tests. -->
+                <ignoredUnusedDeclaredDependency>org.jboss.resteasy:resteasy-core</ignoredUnusedDeclaredDependency>
+              </ignoredUnusedDeclaredDependencies>
             </configuration>
           </execution>
         </executions>
