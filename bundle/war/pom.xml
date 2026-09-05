@@ -14,11 +14,11 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>itz-rest-adapter</artifactId>
+      <artifactId>itz-jpa-adapter</artifactId>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>itz-jpa-adapter</artifactId>
+      <artifactId>itz-rest-adapter</artifactId>
     </dependency>
   </dependencies>
   <build>
