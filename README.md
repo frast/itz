@@ -20,6 +20,26 @@ Lokale Experimentierumgebung mit JBoss EAP 8.1, Oracle Database 19c und VS Code 
 Die Anwendung ist danach unter http://localhost:8080/itz/api/ping erreichbar. Die
 API erwartet einen gültigen JWT-Bearer-Token aus dem lokalen Keycloak.
 
+## Entwicklungsumgebung pausieren und fortsetzen
+
+Zum Beenden der Container inklusive Dev Container und optionalem
+Observability-Stack aus dem Host-Terminal ausführen:
+
+```bash
+./scripts/stop-environment.sh
+```
+
+Die Container und Daten-Volumes bleiben dabei erhalten. Zum Fortsetzen:
+
+```bash
+./scripts/start-environment.sh
+```
+
+Die Skripte verwenden das Compose-Projekt `itz` und laden sowohl
+`compose.yaml` als auch `compose.dev.yaml`. `down -v` darf nicht verwendet
+werden, wenn Oracle-, Keycloak-, Maven- oder Observability-Daten erhalten
+bleiben sollen.
+
 ## Lokale JWT-Authentifizierung
 
 Keycloak wird für die lokale Entwicklung automatisch aus
