@@ -153,8 +153,8 @@ der Docker-Zeitstempel; der Zeitstempel des Loggers steht im JSON-Feld `timestam
 Unstrukturierte Startskript-Ausgaben und Oracle-Logs bleiben als Text erhalten,
 auch wenn sie kein gueltiges JSON sind. Alte Textlogs werden nicht nachtraeglich
 umgewandelt und haben kein von Alloy erfasstes `level`-Label.
-Oracle-Dateien ausserhalb der Konsolenausgabe und Browserfehler sind noch keine
-zusaetzlichen Quellen.
+Zusaetzlich liest Alloy Oracle-Alert- und Listener-Dateien aus dem gemeinsamen
+Diagnose-Volume (Aktivierung siehe unten). Browserfehler sind noch keine Quelle.
 
 Loki speichert Daten in `loki-data` und loescht Logs nach sieben Tagen asynchron
 ueber den Compactor. `alloy-data` bewahrt Lesepositionen und `grafana-data` den
@@ -225,6 +225,71 @@ HTTP-Fehler der Grafana-Abfrage werden mit Statuscode sofort gemeldet.
 Es gibt keine Log-Payloads aus. Die Pruefung direkt nach dem Neuaufbau ausfuehren,
 solange die Startmeldungen noch in den letzten 5000 Container-Logzeilen und
 innerhalb der Loki-Aufbewahrungszeit liegen.
+
+### Oracle-Diagnoselogs aktivieren und pruefen
+
+Oracle schreibt sein ADR-Verzeichnis nach `/opt/oracle/diag`. Das separate
+Volume `oracle-diagnostics` macht dieses Verzeichnis persistent und fuer Alloy
+unter `/var/log/oracle` ausschliesslich lesbar. Der einmalig laufende Service
+`oracle-diagnostics-init` setzt den Besitzer des Volume-Verzeichnisses auf den
+Oracle-Benutzer aus demselben Image. Er startet keine Datenbank.
+
+**Bestehende Umgebung:** Vor dem ersten `docker compose up`, das Oracle mit dem
+neuen Mount neu erstellen wuerde, auf dem Docker-Host ausfuehren:
+
+```bash
+bash scripts/enable-oracle-diagnostics.sh
+docker compose ps oracle
+# Sobald Oracle healthy ist:
+bash scripts/test-oracle-logging.sh
+bash scripts/test-observability.sh
+```
+
+Das Aktivierungsskript initialisiert das Diagnose-Volume, stoppt Oracle sauber,
+kopiert das bisherige ADR-Verzeichnis aus dem gestoppten Container und ersetzt
+erst danach den Container mit dem neuen Mount. Dabei entsteht eine kurze
+Datenbankunterbrechung. Das bestehende `oracle-data`-Volume wird weiterverwendet;
+EAP und Keycloak werden nicht neu gestartet. Aktive Datenbankverbindungen koennen
+waehrend der Unterbrechung fehlschlagen. Bei bereits eingebundenem Diagnose-Volume
+wird die Kopie uebersprungen. Fuer eine frische Umgebung reicht der normale
+Compose-Start; dort ist keine Uebernahme alter Diagnosedateien erforderlich.
+
+Bei einem Kopierfehler bleibt der urspruengliche Container gestoppt erhalten.
+Den Fehler beheben und das Skript wiederholen oder den vorhandenen Container mit
+`docker compose start oracle` starten. Bis die Uebernahme erfolgreich ist, Oracle
+nicht mit `up` neu erstellen. Das Skript setzt weder die Datenbank zurueck noch
+loescht es Volumes.
+
+Die erfassten Quellen lassen sich in Grafana getrennt abfragen:
+
+```logql
+{service_name="oracle", log_source="oracle_alert"}
+{service_name="oracle", log_source="oracle_listener"}
+{service_name="oracle", log_source="container"}
+```
+
+Alloy liest nur `rdbms/*/*/trace/alert*.log` und
+`tnslsnr/*/*/trace/listener.log`. Andere Trace-Dateien, XML-Kopien und Auditdateien
+werden nicht eingesammelt. Das Label `filename` zeigt die Quelldatei. Alert-Zeilen
+werden ab einer ISO-Zeitstempelzeile zusammengefasst, maximal 256 Zeilen je Eintrag;
+Listener-Ausgaben bleiben zeilenweise erhalten. Das Oracle-Image gibt das Alert-Log
+auch auf der Konsole aus: Dieselbe Meldung kann deshalb unter `container` und
+`oracle_alert` vorkommen. Fuer Auswertungen eine Quelle auswaehlen.
+
+Beim erstmaligen Entdecken wird eine Datei ab Anfang eingelesen, danach setzt
+Alloy anhand der Lesepositionen in `alloy-data` fort. Der Loki-Zeitstempel ist bei
+diesen Dateiquellen die Lesezeit; die urspruenglichen Oracle-Zeitangaben bleiben
+im Text. Dadurch erscheinen uebernommene historische Eintraege beim Import als
+neue Eintraege. Die Loki-Aufbewahrung von sieben Tagen loescht keine Oracle-Dateien
+im Diagnose-Volume; deren Bereinigung bleibt Aufgabe der Oracle-ADR-Verwaltung.
+
+`test-oracle-logging.sh` ist eine reine Lesepruefung: Es verlangt eine gesunde
+Datenbank mit Diagnose-Mount, findet nichtleere Alert-/Listener-Dateien und prueft
+passende Dateiquellen in Grafana. Direkt nach der Aktivierung ausfuehren; das
+Abfragefenster betraegt eine Stunde. Fortschritt und Fehler werden ohne
+Log-Payloads ausgegeben. Voraussetzungen: Bash, Docker Compose, curl, jq und
+GNU timeout. Fehlende Dateien oder eine ungesunde Datenbank fuehren sofort zu
+einem Fehler statt zu einer stillen Warteschleife.
 
 Nur den Logging-Stack anhalten, Daten behalten:
 

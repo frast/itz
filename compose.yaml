@@ -14,6 +14,14 @@ services:
       - keycloak-data:/opt/keycloak/data
       - ./config/keycloak:/opt/keycloak/data/import:ro
 
+  oracle-diagnostics-init:
+    image: oracle/database:19.3.0-ee
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["chown oracle:oinstall /diagnostics"]
+    volumes:
+      - oracle-diagnostics:/diagnostics
+
   oracle:
     image: oracle/database:19.3.0-ee
     environment:
@@ -28,7 +36,11 @@ services:
       - "127.0.0.1:1521:1521"
     volumes:
       - oracle-data:/opt/oracle/oradata
+      - oracle-diagnostics:/opt/oracle/diag
       - ./db/setup:/opt/oracle/scripts/setup:ro
+    depends_on:
+      oracle-diagnostics-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "echo 'SELECT 1 FROM dual;' | sqlplus -s system/$$ORACLE_PWD@//localhost:1521/ORCLPDB1 | grep -q 1"]
       interval: 20s
@@ -90,6 +102,7 @@ services:
       - ./config/observability/config.alloy:/etc/alloy/config.alloy:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - alloy-data:/var/lib/alloy/data
+      - oracle-diagnostics:/var/log/oracle:ro
     depends_on:
       - loki
     restart: unless-stopped
@@ -116,6 +129,7 @@ services:
 
 volumes:
   oracle-data:
+  oracle-diagnostics:
   keycloak-data:
   loki-data:
   alloy-data:

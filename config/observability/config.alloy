@@ -33,7 +33,7 @@ loki.source.docker "itz" {
   host             = "unix:///var/run/docker.sock"
   targets          = discovery.relabel.itz.output
   refresh_interval = "5s"
-  labels           = { environment = "development" }
+  labels           = { environment = "development", log_source = "container" }
   forward_to       = [loki.process.application.receiver]
 }
 
@@ -53,6 +53,46 @@ loki.process "application" {
     }
   }
 
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.source.file "oracle_alert" {
+  targets = [{
+    __path__     = "/var/log/oracle/rdbms/*/*/trace/alert*.log",
+    service_name = "oracle",
+    project      = sys.env("COMPOSE_PROJECT_NAME"),
+    environment  = "development",
+    log_source   = "oracle_alert",
+  }]
+  file_match {
+    enabled = true
+    sync_period = "5s"
+  }
+  forward_to = [loki.process.oracle_alert.receiver]
+}
+
+loki.process "oracle_alert" {
+  // Oracle 19c prefixes alert records with an ISO timestamp on a separate line.
+  stage.multiline {
+    firstline     = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T"
+    max_wait_time = "3s"
+    max_lines     = 256
+  }
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.source.file "oracle_listener" {
+  targets = [{
+    __path__     = "/var/log/oracle/tnslsnr/*/*/trace/listener.log",
+    service_name = "oracle",
+    project      = sys.env("COMPOSE_PROJECT_NAME"),
+    environment  = "development",
+    log_source   = "oracle_listener",
+  }]
+  file_match {
+    enabled = true
+    sync_period = "5s"
+  }
   forward_to = [loki.write.local.receiver]
 }
 
