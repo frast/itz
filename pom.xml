@@ -18,7 +18,7 @@
     <project.build.outputTimestamp>2026-08-30T00:00:00Z</project.build.outputTimestamp>
     <version.jboss.eap>8.1.7.GA-redhat-00004</version.jboss.eap>
     <version.junit.jupiter>6.1.3</version.junit.jupiter>
-    <version.weld.junit5>4.0.5.Final</version.weld.junit5>
+    <version.weld.junit5>5.0.3.Final</version.weld.junit5>
     <version.maven.clean.plugin>3.5.0</version.maven.clean.plugin>
     <version.maven.compiler.plugin>3.16.0</version.maven.compiler.plugin>
     <version.maven.deploy.plugin>3.1.4</version.maven.deploy.plugin>
@@ -27,14 +27,14 @@
     <version.maven.jar.plugin>3.5.1</version.maven.jar.plugin>
     <version.maven.resources.plugin>3.5.0</version.maven.resources.plugin>
     <version.maven.ear.plugin>3.4.0</version.maven.ear.plugin>
-    <version.maven.enforcer.plugin>3.6.2</version.maven.enforcer.plugin>
+    <version.maven.enforcer.plugin>3.6.3</version.maven.enforcer.plugin>
     <version.maven.surefire.plugin>3.6.0</version.maven.surefire.plugin>
-    <version.openapi-generator-maven-plugin>7.24.0</version.openapi-generator-maven-plugin>
+    <version.openapi-generator-maven-plugin>7.25.0</version.openapi-generator-maven-plugin>
     <version.error-prone>2.50.0</version.error-prone>
     <version.jspecify>1.0.1</version.jspecify>
     <version.nullaway>0.14.1</version.nullaway>
     <version.maven.war.plugin>3.5.1</version.maven.war.plugin>
-    <spotless-maven-plugin.version>3.10.2</spotless-maven-plugin.version>
+    <version.spotless.maven.plugin>3.10.2</version.spotless.maven.plugin>
     <version.wildfly.maven.plugin>6.0.1.Final</version.wildfly.maven.plugin>
   </properties>
   <repositories>
@@ -121,7 +121,7 @@
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
-        <version>${spotless-maven-plugin.version}</version>
+        <version>${version.spotless.maven.plugin}</version>
         <configuration>
           <java>
             <eclipse>
