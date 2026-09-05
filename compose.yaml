@@ -42,7 +42,9 @@ services:
       oracle-diagnostics-init:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD-SHELL", "echo 'SELECT 1 FROM dual;' | sqlplus -s system/$$ORACLE_PWD@//localhost:1521/ORCLPDB1 | grep -q 1"]
+      # Use local SYSDBA access so the healthcheck does not open a listener
+      # connection every 20 seconds and flood listener.log with establish events.
+      test: ["CMD-SHELL", "echo 'SELECT open_mode FROM v$$database;' | sqlplus -s / as sysdba | grep -q 'READ WRITE'"]
       interval: 20s
       timeout: 10s
       retries: 30

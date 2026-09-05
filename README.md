@@ -128,7 +128,11 @@ Dashboard: http://localhost:3000/d/itz-logs
 
 Das Dashboard bietet Filter fuer Service, Source (`container`, `oracle_alert`,
 `oracle_listener`), Level, Request ID und eine freie Text search. Die Request ID
-wird aus dem verschachtelten JSON-Feld `mdc["request.id"]` extrahiert. Die freie Text search wird
+wird aus dem verschachtelten JSON-Feld `mdc["request.id"]` extrahiert. EAP- und
+Keycloak-Streams werden dafuer separat als JSON geparst; fehlerhafte JSON-Zeilen
+werden aus dieser Abfrage mit `__error__=""` ausgeschlossen. Oracle-Streams werden
+in einer zweiten Abfrage als Plaintext behandelt und erzeugen deshalb keinen
+`JSONParserErr`. Die freie Text search wird
 als escaped Regex in einer LogQL-Line-Filterung verwendet; fuer komplexe LogQL-Ausdruecke
 Grafana Explore verwenden.
 
@@ -298,6 +302,13 @@ Die erfassten Sources lassen sich in Grafana getrennt abfragen:
 {service_name="oracle", log_source="oracle_listener"}
 {service_name="oracle", log_source="container"}
 ```
+
+Der Oracle-Healthcheck verwendet lokalen SYSDBA-Zugriff und prueft
+`v$database.open_mode`. Dadurch wird keine TCP-Verbindung ueber den Listener
+aufgebaut. Die regelmaessigen `establish`-Eintraege im Listener-Log entfallen;
+der Healthcheck belastet den Listener nicht mehr. Der Netzwerkpfad auf Port 1521
+wird damit nicht durch den Healthcheck validiert, sondern separat durch die
+Anwendung und den EAP-Datasource-Check.
 
 Alloy liest nur `rdbms/*/*/trace/alert*.log` und
 `tnslsnr/*/*/trace/listener.log`. Andere Trace-Dateien, XML-Kopien und Auditdateien
