@@ -64,6 +64,13 @@
         "type": "textbox",
         "query": "",
         "current": { "text": "", "value": "" }
+      },
+      {
+        "name": "request_id",
+        "label": "Request ID",
+        "type": "textbox",
+        "query": "",
+        "current": { "text": "", "value": "" }
       }
     ]
   },
@@ -77,7 +84,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "{environment=\"development\", service_name=~\"${service:regex}\", log_source=~\"${source:regex}\", level=~\"${level:regex}\"} |= \"${search:doublequote}\"",
+          "expr": "{environment=\"development\", service_name=~\"${service:regex}\", log_source=~\"${source:regex}\", level=~\"${level:regex}\"} | json request_id=\"mdc[\\\"request.id\\\"]\" | request_id=~\"${request_id:regex}\" |~ \"${search:regex}\"",
           "queryType": "range"
         }
       ],

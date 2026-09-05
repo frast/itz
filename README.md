@@ -127,9 +127,35 @@ deshalb die Docker-Befehle im Host-Terminal ausfuehren.
 Dashboard: http://localhost:3000/d/itz-logs
 
 Das Dashboard bietet Filter fuer Service, Source (`container`, `oracle_alert`,
-`oracle_listener`), Level und eine freie Text search. Bei einer freien Text search
-werden Anfuehrungszeichen als Literal behandelt; fuer komplexe LogQL-Ausdruecke
+`oracle_listener`), Level, Request ID und eine freie Text search. Die Request ID
+wird aus dem verschachtelten JSON-Feld `mdc["request.id"]` extrahiert. Die freie Text search wird
+als escaped Regex in einer LogQL-Line-Filterung verwendet; fuer komplexe LogQL-Ausdruecke
 Grafana Explore verwenden.
+
+### Request correlation
+
+REST-Anfragen erhalten eine `X-Request-ID`. Eine gueltige vom Client gesendete
+ID mit maximal 128 Zeichen (`A-Z`, `a-z`, Ziffern, `.`, `_`, `:` und `-`) wird
+uebernommen; alle anderen Werte werden durch eine UUID ersetzt. Die ID steht in
+der Response und im EAP-JSON-MDC-Feld `mdc.request.id` bereit. Damit kannst du
+beispielsweise mit folgender LogQL-Abfrage alle Servermeldungen eines Requests
+suchen:
+
+```logql
+{service_name="eap"} | json request_id="mdc[\"request.id\"]" | request_id="<request-id>"
+```
+
+Die Request-ID wird nach der Response aus dem MDC entfernt. Die Anwendung loggt
+keine Authorization-Header oder vollstaendige Request-Payloads.
+
+Der geschuetzte Ping-Endpunkt schreibt zu Testzwecken zwei INFO-Eintraege:
+`Handling ping request` und `Ping request completed`. Mit einer REST-Client-Anfrage
+wie der in [requests/requests.http](requests/requests.http) kannst du die
+zugehoerige ID aus der Response kopieren und in Grafana suchen:
+
+```logql
+{service_name="eap", level="INFO"} | json | mdc_request_id="<request-id>"
+```
 
 Grafana erlaubt lokal anonymen Lesezugriff ohne Anmeldung; es wird kein initialer
 Admin angelegt. Datenquelle und Dashboard werden ueber Dateien verwaltet.
