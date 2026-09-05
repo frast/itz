@@ -84,7 +84,12 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "{environment=\"development\", service_name=~\"${service:regex}\", log_source=~\"${source:regex}\", level=~\"${level:regex}\"} | json request_id=\"mdc[\\\"request.id\\\"]\" | request_id=~\"${request_id:regex}\" |~ \"${search:regex}\"",
+          "expr": "{environment=\"development\", service_name=~\"${service:regex}\", log_source=~\"${source:regex}\", level=~\"${level:regex}\"} | json request_id=\"mdc[\\\"request.id\\\"]\" | __error__=\"\" | request_id=~\"${request_id:regex}\" |~ \"${search:regex}\"",
+          "queryType": "range"
+        },
+        {
+          "refId": "B",
+          "expr": "{environment=\"development\", service_name=~\"${service:regex}\", log_source=~\"${source:regex}\", level=~\"${level:regex}\"} |~ \"${search:regex}\"",
           "queryType": "range"
         }
       ],
