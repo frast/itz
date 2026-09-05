@@ -105,6 +105,83 @@ erreichbar. Die Zugangsdaten sind `EAP_MGMT_USER` und `EAP_MGMT_PASSWORD` aus
 der lokalen Datei `.env`. Der Port ist bewusst nur an `127.0.0.1` gebunden und
 nicht im lokalen Netzwerk veroeffentlicht.
 
+## Zentrale Logs (lokale Entwicklung)
+
+Das optionale Compose-Profil `observability` sammelt die Konsolenausgaben von
+`eap`, `keycloak` und `oracle` ueber Grafana Alloy in Loki. Grafana stellt eine
+vorkonfigurierte Datenquelle und das Dashboard **ITZ Container Logs** bereit.
+Die Images sind auf feste Versionen gesetzt; die Konfiguration liegt unter
+`config/observability`.
+
+Auf dem Docker-Host aus dem Projektverzeichnis starten (mit vorhandener `.env`):
+
+```bash
+docker compose --profile observability up -d --no-deps loki alloy grafana
+```
+
+Dieser Befehl startet nur den Logging-Stack. Bereits laufende Anwendungscontainer
+werden automatisch entdeckt; EAP, Keycloak und Oracle werden nicht neu gestartet.
+Im Dev Container sind Docker-CLI und Docker-Socket derzeit nicht eingebunden,
+deshalb die Docker-Befehle im Host-Terminal ausfuehren.
+
+Dashboard: http://localhost:3000/d/itz-logs
+
+Grafana erlaubt lokal anonymen Lesezugriff ohne Anmeldung; es wird kein initialer
+Admin angelegt. Datenquelle und Dashboard werden ueber Dateien verwaltet.
+Port 3000 ist nur an `127.0.0.1` gebunden, Loki und Alloy veroeffentlichen keine
+Host-Ports. Dies ist eine lokale Entwicklungskonfiguration, keine Konfiguration
+fuer einen gemeinsam genutzten oder oeffentlichen Server.
+
+In Grafana Explore die Datenquelle **Loki** waehlen, zum Beispiel:
+
+```logql
+{service_name="eap"}
+{service_name=~"eap|keycloak|oracle"} |= "ERROR"
+{service_name="oracle"} |= "ORA-"
+```
+
+Die Labels `project`, `service_name` und `environment="development"` ermoeglichen
+die gemeinsame Suche. Alloy beschraenkt die Erfassung auf das aktuelle
+Compose-Projekt und diese drei Services. Request-IDs oder Benutzer-IDs werden
+nicht als Index-Labels verwendet. Die Ausgaben bleiben in diesem ersten Abschnitt
+im Originalformat; mehrzeilige Stacktraces koennen mehrere Eintraege bilden.
+Oracle-Dateien ausserhalb der Konsolenausgabe und Browserfehler sind noch keine
+zusaetzlichen Quellen.
+
+Loki speichert Daten in `loki-data` und loescht Logs nach sieben Tagen asynchron
+ueber den Compactor. `alloy-data` bewahrt Lesepositionen und `grafana-data` den
+Grafana-Zustand bei Neustarts. Die Aufbewahrungszeit ist kein festes Speicherlimit;
+Docker verwaltet seine eigenen Container-Logs unabhaengig davon. Bei laengeren
+Ausfaellen koennen bereits von Docker entfernte Logs nicht nachgelesen werden.
+Keine Tokens, Kennwoerter oder sensiblen Nutzdaten in Anwendungslogs ausgeben.
+
+Alloy greift als root auf den Docker-Socket zu. Der `:ro`-Mount verhindert keine
+schreibenden Docker-API-Aufrufe; der Collector hat dadurch weitreichenden Zugriff
+auf den lokalen Docker-Host. Diese Anbindung ist fuer die lokale Umgebung gedacht.
+
+Konfiguration und Transport mit synthetischen Logs pruefen (Bash, Docker Compose,
+curl und jq auf dem Docker-Host erforderlich):
+
+```bash
+bash scripts/test-observability.sh
+```
+
+Der Test validiert Alloy und Loki, startet nur den Logging-Stack und prueft das
+Dashboard sowie die Abfrage synthetischer Logs aller drei Service-Namen durch
+Grafana. Er prueft auch den Ausschluss anderer Services und Compose-Projekte.
+Die temporaeren Testcontainer werden anschliessend entfernt; der Logging-Stack
+bleibt laufen. Damit werden Transport und Filter getestet, nicht die fachlichen
+Logausgaben der echten Services. Diese anschliessend im Dashboard kontrollieren.
+
+Nur den Logging-Stack anhalten, Daten behalten:
+
+```bash
+docker compose --profile observability stop alloy grafana loki
+```
+
+`docker compose down -v` entfernt auch die Logging-Volumes und die bestehenden
+Datenbank-Volumes. Fuer das Einrichten oder Testen der Logs ist das nicht notwendig.
+
 ## Codeformatierung
 
 VS Code formatiert Java-Dateien beim Speichern mit dem eingecheckten Profil
