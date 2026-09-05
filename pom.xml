@@ -20,7 +20,7 @@
     <version.junit.jupiter>5.13.4</version.junit.jupiter>
     <version.weld.junit5>4.0.5.Final</version.weld.junit5>
     <version.maven.clean.plugin>3.5.0</version.maven.clean.plugin>
-    <version.maven.compiler.plugin>3.14.0</version.maven.compiler.plugin>
+    <version.maven.compiler.plugin>3.16.0</version.maven.compiler.plugin>
     <version.maven.deploy.plugin>3.1.4</version.maven.deploy.plugin>
     <version.maven.dependency.plugin>3.11.0</version.maven.dependency.plugin>
     <version.maven.install.plugin>3.1.4</version.maven.install.plugin>
@@ -28,13 +28,13 @@
     <version.maven.resources.plugin>3.5.0</version.maven.resources.plugin>
     <version.maven.ear.plugin>3.4.0</version.maven.ear.plugin>
     <version.maven.enforcer.plugin>3.6.2</version.maven.enforcer.plugin>
-    <version.maven.surefire.plugin>3.5.3</version.maven.surefire.plugin>
+    <version.maven.surefire.plugin>3.6.0</version.maven.surefire.plugin>
     <version.openapi-generator-maven-plugin>7.24.0</version.openapi-generator-maven-plugin>
     <version.error-prone>2.50.0</version.error-prone>
     <version.jspecify>1.0.1</version.jspecify>
-    <version.nullaway>0.14.0</version.nullaway>
+    <version.nullaway>0.14.1</version.nullaway>
     <version.maven.war.plugin>3.5.1</version.maven.war.plugin>
-    <spotless-maven-plugin.version>3.8.0</spotless-maven-plugin.version>
+    <spotless-maven-plugin.version>3.10.2</spotless-maven-plugin.version>
     <version.wildfly.maven.plugin>6.0.1.Final</version.wildfly.maven.plugin>
   </properties>
   <repositories>
