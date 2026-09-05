@@ -124,8 +124,8 @@ bundle            --> adapters (composition and deployment only)
 Run the narrowest useful check first, then the repository-level check before handoff:
 
 ```bash
-mvn -pl <changed-module> -am test
-mvn verify
+./mvnw -pl <changed-module> -am test
+./mvnw verify
 ```
 
 Every implementation change must be verified with Maven, and the relevant build and
@@ -135,10 +135,10 @@ complete when the Maven build or tests are failing.
 For packaging changes also run:
 
 ```bash
-mvn -pl bundle/ear -am package
+./mvnw -pl bundle/ear -am package
 ```
 
-Use `mvn -s .mvn/settings.xml -pl bundle/ear -am -Pdeploy-eap install` only when a running local EAP stack and
+Use `./mvnw -s .mvn/settings.xml -pl bundle/ear -am -Pdeploy-eap install` only when a running local EAP stack and
 valid local credentials are available. Do not start containers, deploy, reset Oracle, or
 run `docker compose down -v` unless the task requires it; `down -v` destroys local data.
 
