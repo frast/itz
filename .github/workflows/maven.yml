@@ -33,4 +33,4 @@ jobs:
           cache: maven
 
       - name: Verify reactor
-        run: ./mvnw -B -ntp verify
+        run: SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) ./mvnw -B -ntp verify
