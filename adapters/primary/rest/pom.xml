@@ -18,6 +18,10 @@
             <artifactId>itz-usecases</artifactId>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>itz-domain</artifactId>
+        </dependency>
+        <dependency>
             <groupId>jakarta.ws.rs</groupId>
             <artifactId>jakarta.ws.rs-api</artifactId>
             <scope>provided</scope>
@@ -49,7 +53,12 @@
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
