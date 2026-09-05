@@ -20,9 +20,11 @@ RUN mkdir -p /opt/server/modules/com/oracle/ojdbc/main
 COPY --from=jdbc /jdbc/ojdbc11-*.jar /opt/server/modules/com/oracle/ojdbc/main/ojdbc11.jar
 COPY module.xml /opt/server/modules/com/oracle/ojdbc/main/module.xml
 COPY configure-datasource.cli /usr/local/etc/itz/configure-datasource.cli
+COPY configure-logging.cli /usr/local/etc/itz/configure-logging.cli
 COPY launch-eap.sh /usr/local/bin/launch-eap.sh
 RUN chmod 0755 /usr/local/bin/launch-eap.sh && chown -R 185:0 /opt/server/modules/com/oracle /usr/local/etc/itz
 
 USER 185
+RUN /opt/server/bin/jboss-cli.sh --file=/usr/local/etc/itz/configure-logging.cli
 EXPOSE 8080 9990
 ENTRYPOINT ["/usr/local/bin/launch-eap.sh"]

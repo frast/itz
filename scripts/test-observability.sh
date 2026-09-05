@@ -14,6 +14,8 @@ alloy_image=$("${compose[@]}" config --format json | jq -r '.services.alloy.imag
 "${compose[@]}" run --rm --no-deps loki -config.file=/etc/loki/config.yaml -verify-config=true
 # Explicit services avoid starting or recreating EAP, Oracle or Keycloak.
 "${compose[@]}" up -d --no-deps loki alloy grafana
+# Compose does not recreate containers when only bind-mounted configuration changes.
+"${compose[@]}" restart alloy
 
 grafana_url=http://127.0.0.1:3000
 ready=false
@@ -40,11 +42,18 @@ trap cleanup EXIT
 # Synthetic containers exercise discovery, project/service filtering and ingestion.
 # No application container is modified and no real log payload is printed.
 for service in eap keycloak oracle dev; do
+    payload="$marker"
+    if [[ "$service" == eap || "$service" == keycloak ]]; then
+        payload=$(jq -cn --arg marker "$marker" --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{timestamp: $timestamp, level: "ERROR", loggerName: "itz.smoke", message: $marker,
+              stackTrace: "java.lang.IllegalStateException: synthetic\n\tat itz.Smoke.run(Smoke.java:1)"}')
+    fi
     containers+=("$(docker run -d --label "com.docker.compose.project=$project" \
         --label "com.docker.compose.service=$service" \
         --label com.docker.compose.oneoff=True \
         --entrypoint /bin/sh "$alloy_image" \
-        -c 'while true; do echo "$1"; sleep 2; done' sh "$marker")")
+        -c 'while true; do printf "%s\n%s\n" "$1" "$2"; sleep 2; done' \
+        sh "$payload" "$marker-plain {invalid")")
 done
 containers+=("$(docker run -d --label "com.docker.compose.project=$marker" \
     --label com.docker.compose.service=eap --entrypoint /bin/sh "$alloy_image" \
@@ -57,12 +66,19 @@ for ((attempt = 0; attempt < 60; attempt++)); do
         "$grafana_url/api/datasources/proxy/uid/loki/loki/api/v1/query_range" \
         --data-urlencode "query={environment=\"development\"} |= \"$marker\"" \
         --data-urlencode 'since=5m' --data-urlencode 'limit=1000' 2>/dev/null) &&
-        jq -e --arg project "$project" '
+        jq -e --arg project "$project" --arg marker "$marker" '
             .status == "success" and
             ([.data.result[].stream.service_name] | unique == ["eap", "keycloak", "oracle"]) and
-            ([.data.result[].stream.project] | unique == [$project])
+            ([.data.result[].stream.project] | unique == [$project]) and
+            ([.data.result[] | select(.stream.level == "ERROR") |
+                select(any(.values[]; (.[1] | fromjson? |
+                    .message == $marker and .loggerName == "itz.smoke" and
+                    .stackTrace == "java.lang.IllegalStateException: synthetic\n\tat itz.Smoke.run(Smoke.java:1)"))) |
+                .stream.service_name] | unique == ["eap", "keycloak"]) and
+            ([.data.result[] | select(any(.values[]; .[1] == ($marker + "-plain {invalid"))) |
+                .stream.service_name] | unique == ["eap", "keycloak", "oracle"])
         ' <<< "$response" >/dev/null; then
-        echo "PASS: EAP, Keycloak and Oracle markers reached Grafana through Alloy and Loki; unrelated containers excluded."
+        echo "PASS: Structured EAP/Keycloak logs, intact stacktraces and plain-text fallback reached Grafana; Oracle logs and container filters verified."
         exit 0
     fi
     sleep 2

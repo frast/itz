@@ -136,15 +136,23 @@ In Grafana Explore die Datenquelle **Loki** waehlen, zum Beispiel:
 
 ```logql
 {service_name="eap"}
-{service_name=~"eap|keycloak|oracle"} |= "ERROR"
+{service_name=~"eap|keycloak", level="ERROR"}
+{service_name="eap"} | json | __error__="" | loggerName="org.jboss.as"
 {service_name="oracle"} |= "ORA-"
 ```
 
 Die Labels `project`, `service_name` und `environment="development"` ermoeglichen
 die gemeinsame Suche. Alloy beschraenkt die Erfassung auf das aktuelle
 Compose-Projekt und diese drei Services. Request-IDs oder Benutzer-IDs werden
-nicht als Index-Labels verwendet. Die Ausgaben bleiben in diesem ersten Abschnitt
-im Originalformat; mehrzeilige Stacktraces koennen mehrere Eintraege bilden.
+nicht als Index-Labels verwendet. EAP und Keycloak schreiben strukturierte
+JSON-Konsolenlogs mit `timestamp`, `level`, `loggerName` und `message`. Alloy
+uebernimmt `level` als zusaetzliches Label; die vollstaendige JSON-Meldung bleibt
+erhalten und kann mit `| json` ausgewertet werden. Stacktraces des JSON-Formatters
+stehen mit escapten Zeilenumbruechen in einem Eintrag. Der Loki-Zeitstempel bleibt
+der Docker-Zeitstempel; der Zeitstempel des Loggers steht im JSON-Feld `timestamp`.
+Unstrukturierte Startskript-Ausgaben und Oracle-Logs bleiben als Text erhalten,
+auch wenn sie kein gueltiges JSON sind. Alte Textlogs werden nicht nachtraeglich
+umgewandelt und haben kein von Alloy erfasstes `level`-Label.
 Oracle-Dateien ausserhalb der Konsolenausgabe und Browserfehler sind noch keine
 zusaetzlichen Quellen.
 
@@ -166,12 +174,57 @@ curl und jq auf dem Docker-Host erforderlich):
 bash scripts/test-observability.sh
 ```
 
-Der Test validiert Alloy und Loki, startet nur den Logging-Stack und prueft das
+Der Test validiert Alloy und Loki, startet nur den Logging-Stack, startet Alloy
+zum Laden der aktuellen Konfiguration neu und prueft das
 Dashboard sowie die Abfrage synthetischer Logs aller drei Service-Namen durch
-Grafana. Er prueft auch den Ausschluss anderer Services und Compose-Projekte.
+Grafana. Er prueft JSON-Felder, das `level`-Label, einen vollstaendigen Stacktrace,
+den Erhalt unstrukturierter Ausgaben sowie den Ausschluss anderer Services und
+Compose-Projekte.
 Die temporaeren Testcontainer werden anschliessend entfernt; der Logging-Stack
 bleibt laufen. Damit werden Transport und Filter getestet, nicht die fachlichen
 Logausgaben der echten Services. Diese anschliessend im Dashboard kontrollieren.
+
+### Strukturierte Logs aktivieren und pruefen
+
+Bei einer bestehenden Umgebung muss das EAP-Image fuer den JSON-Formatter neu
+gebaut und Keycloak fuer `KC_LOG_CONSOLE_OUTPUT=json` neu erstellt werden.
+Der Formatter wird beim EAP-Image-Bau mit dem eingebetteten Server konfiguriert,
+bevor die erste regulaere Serverinstanz startet. Anwendungslogs ueber das
+EAP-Logging-Subsystem erhalten damit ebenfalls das JSON-Format.
+
+Auf dem Docker-Host ausfuehren; Oracle muss bereits laufen:
+
+```bash
+bash scripts/test-observability.sh
+docker compose up -d --no-deps --force-recreate keycloak
+docker compose up -d --no-deps --build eap
+bash scripts/test-structured-logging.sh
+```
+
+Alloy muss die neue Verarbeitung vor den Serverstarts geladen haben. Der erste
+Test stellt das durch einen Alloy-Neustart und synthetische Logs sicher.
+Bereits eingelesene Startmeldungen erhalten nachtraeglich kein `level`-Label.
+Wurden die Server vor Alloy aktualisiert, zuerst den synthetischen Test ausfuehren,
+dann `docker compose restart keycloak eap` und den strukturierten Test wiederholen.
+Dabei bleiben die Container erhalten; fuer neue Startmeldungen ist kein erneuter
+Image-Bau erforderlich.
+
+Der EAP-Neustart verwendet weiterhin das bestehende `drop-and-create`-Profil:
+Ein erneutes Deployment kann deshalb das Anwendungsschema neu erzeugen. Ein
+ueber die Management-Schnittstelle bereitgestelltes EAR muss nach dem Ersetzen
+des EAP-Containers gegebenenfalls erneut mit dem dokumentierten Maven-Befehl
+deployt werden. Keycloak behaelt seine Daten im vorhandenen Volume.
+
+`test-structured-logging.sh` benoetigt zusaetzlich GNU `timeout` (unter Linux in
+coreutils enthalten) und startet keine Services. Es prueft die echten
+Startmeldungen der aktuell laufenden EAP- und Keycloak-Container sowohl auf
+JSON-Felder als auch auf ihre Abfragbarkeit in Grafana mit `level="INFO"`.
+Es meldet den Fortschritt getrennt fuer Container-Logs und Grafana, begrenzt
+Docker-Aufrufe auf 15 Sekunden und wartet pro Service etwa eine Minute.
+HTTP-Fehler der Grafana-Abfrage werden mit Statuscode sofort gemeldet.
+Es gibt keine Log-Payloads aus. Die Pruefung direkt nach dem Neuaufbau ausfuehren,
+solange die Startmeldungen noch in den letzten 5000 Container-Logzeilen und
+innerhalb der Loki-Aufbewahrungszeit liegen.
 
 Nur den Logging-Stack anhalten, Daten behalten:
 

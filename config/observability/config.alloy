@@ -34,7 +34,26 @@ loki.source.docker "itz" {
   targets          = discovery.relabel.itz.output
   refresh_interval = "5s"
   labels           = { environment = "development" }
-  forward_to       = [loki.write.local.receiver]
+  forward_to       = [loki.process.application.receiver]
+}
+
+loki.process "application" {
+  // Keep the original JSON, including escaped stacktraces, for query-time parsing.
+  // Shell startup output and Oracle's plain text must also remain available.
+  stage.match {
+    selector = "{service_name=~\"eap|keycloak\"}"
+
+    stage.json {
+      expressions = { level = "level" }
+      drop_malformed = false
+    }
+
+    stage.labels {
+      values = { level = "" }
+    }
+  }
+
+  forward_to = [loki.write.local.receiver]
 }
 
 loki.write "local" {
