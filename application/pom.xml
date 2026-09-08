@@ -12,6 +12,7 @@
   <artifactId>application</artifactId>
   <packaging>pom</packaging>
   <modules>
+    <module>cdi-api</module>
     <module>domain</module>
     <module>usecases</module>
   </modules>

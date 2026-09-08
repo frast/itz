@@ -362,6 +362,11 @@ docker compose --profile observability stop alloy grafana loki
 `docker compose down -v` entfernt auch die Logging-Volumes und die bestehenden
 Datenbank-Volumes. Fuer das Einrichten oder Testen der Logs ist das nicht notwendig.
 
+## CDI Application Services
+
+Application Services verwenden den CDI-Stereotyp `@ApplicationService`, der
+`@ApplicationScoped` vorgibt.
+
 ## Codeformatierung
 
 VS Code formatiert Java-Dateien beim Speichern mit dem eingecheckten Profil

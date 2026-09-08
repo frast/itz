@@ -1,14 +1,14 @@
 package de.itz.application;
 
+import de.itz.application.context.ApplicationService;
 import de.itz.application.security.CurrentUser;
 import de.itz.application.security.CurrentUserContext;
 import de.itz.application.security.ForbiddenException;
 import de.itz.application.security.Permission;
 import de.itz.domain.Ping;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-@ApplicationScoped
+@ApplicationService
 public class PingApplicationService implements PingUseCase {
     private final CurrentUserContext currentUserContext;
 

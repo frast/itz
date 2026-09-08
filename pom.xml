@@ -95,6 +95,11 @@
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
+        <artifactId>itz-cdi-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
         <artifactId>itz-usecases</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -131,8 +136,8 @@
               <version>4.37</version>
               <file>${maven.multiModuleProjectDirectory}/config/java-formatter.xml</file>
             </eclipse>
-            <trimTrailingWhitespace/>
-            <endWithNewline/>
+            <trimTrailingWhitespace />
+            <endWithNewline />
           </java>
         </configuration>
         <executions>
@@ -187,8 +192,8 @@
                 <requireMavenVersion>
                   <version>[3.9.11,4)</version>
                 </requireMavenVersion>
-                <banDuplicatePomDependencyVersions/>
-                <dependencyConvergence/>
+                <banDuplicatePomDependencyVersions />
+                <dependencyConvergence />
               </rules>
             </configuration>
           </execution>
@@ -237,7 +242,10 @@
               <arg>-XDcompilePolicy=simple</arg>
               <arg>--should-stop=ifError=FLOW</arg>
               <arg>-XDaddTypeAnnotationsToSymbol=true</arg>
-              <arg>-Xplugin:ErrorProne -XepDisableAllChecks -Xep:NullAway:ERROR -Xep:RequireExplicitNullMarking:ERROR -XepOpt:NullAway:OnlyNullMarked=true -XepOpt:NullAway:ExcludedFieldAnnotations=jakarta.inject.Inject,jakarta.ws.rs.core.Context -XepExcludedPaths:.*/target/generated-sources/.*</arg>
+              <arg>-Xplugin:ErrorProne -XepDisableAllChecks -Xep:NullAway:ERROR
+                -Xep:RequireExplicitNullMarking:ERROR -XepOpt:NullAway:OnlyNullMarked=true
+                -XepOpt:NullAway:ExcludedFieldAnnotations=jakarta.inject.Inject,jakarta.ws.rs.core.Context
+                -XepExcludedPaths:.*/target/generated-sources/.*</arg>
             </compilerArgs>
             <annotationProcessorPaths>
               <path>

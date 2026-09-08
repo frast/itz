@@ -14,6 +14,10 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>itz-cdi-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>itz-webapp</artifactId>
       <type>war</type>
     </dependency>
@@ -33,6 +37,8 @@
         <configuration>
           <version>10</version>
           <generateApplicationXml>true</generateApplicationXml>
+          <!-- Make application stereotypes visible in the top-level EAR annotation index. -->
+          <defaultLibBundleDir>lib</defaultLibBundleDir>
           <modules>
             <webModule>
               <groupId>${project.groupId}</groupId>
