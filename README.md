@@ -20,6 +20,95 @@ Lokale Experimentierumgebung mit JBoss EAP 8.1, Oracle Database 19c und VS Code 
 Die Anwendung ist danach unter http://localhost:8080/itz/api/ping erreichbar. Die
 API erwartet einen gültigen JWT-Bearer-Token aus dem lokalen Keycloak.
 
+Datei-Uploads erfolgen über `POST /itz/api/files` als Multipart-Feld `file` und
+erfordern ebenfalls einen gültigen JWT-Bearer-Token. Dateien bis 25 MiB werden
+zunächst in Quarantäne geschrieben, durch den lokalen Mock-Virenscanner geprüft
+und danach im konfigurierten Dateiverzeichnis gespeichert. Das Verzeichnis wird
+über `ITZ_FILE_STORAGE_DIRECTORY` oder die JVM-Systemeigenschaft
+`itz.file-storage.directory` gesetzt; standardmäßig ist es `./data/files`.
+Der EICAR-Testmarker wird als infiziert abgewiesen und mit HTTP 422 beantwortet.
+
+Der Application Core ruft dafür ausschließlich `FileStorage.store(...)` auf.
+Der Dateisystemadapter übernimmt Größenprüfung beim Einlesen,
+Quarantäne, Virenscan und die koordinierte Speicherung. Bei einem Scanner-Ausfall
+wird der Upload abgebrochen. Der vorhandene Scanner ist weiterhin ein lokaler
+Mock und kein produktiver Virenschutz.
+
+Dateiinhalte liegen unter `<UUID>.bin`; der Originaldateiname wird niemals als
+Dateipfad verwendet. Die Tabelle `uploaded_file` enthält UUID, Originaldateiname,
+Content-Type, tatsächliche Bytezahl und relativen Speicherschlüssel. Der Dateiname
+ist ein Domain-Value-Object und darf höchstens 255 Unicode-Codepoints enthalten;
+leere Namen und reine Leerzeichen sind unzulässig. REST weist ungültige Namen vor
+dem Lesen des Inhalts mit HTTP 400 und `INVALID_UPLOAD` ab. Ein fehlender
+Multipart-Dateiname wird weiterhin durch `upload.bin` ersetzt. Namen werden nicht
+gekürzt oder normalisiert. `FileName` bezeichnet einen einzelnen Originaldateinamen:
+`.` und `..`, Pfadtrenner (`/`, `\`), die Sonderzeichen `< > : " | ? *`,
+ISO-Steuerzeichen (einschließlich NUL, CR und LF), Unicode-Zeilentrenner
+U+2028/U+2029 und Bidi-Steuerzeichen (U+061C, U+200E/U+200F,
+U+202A–U+202E, U+2066–U+2069) sind unzulässig. Diese Invariante gilt für alle
+Eingänge in die Domain. Normale Unicode-Schriftzeichen und Emoji einschließlich
+Joinern bleiben erlaubt. Die Länge zählt Unicode-Codepoints, nicht UTF-16-Einheiten,
+sichtbare Grapheme oder Bytes; kombinierende Zeichen zählen einzeln.
+Die Prüfung garantiert keine vollständige Kompatibilität mit allen Dateisystemen
+(etwa Windows-Gerätenamen). Der Dateisystemadapter verwendet weiterhin ausschließlich
+den generierten UUID-Speicherschlüssel. Kontextabhängiges Escaping bei der Ausgabe
+und Transport-Decodierung bleiben Aufgaben der jeweiligen Adapter.
+Bereits gespeicherte Namen, die gegen die neuen Regeln verstoßen, müssen vor dem
+Einlesen als Domain-Objekt bereinigt werden; eine automatische Migration erfolgt nicht.
+Die Oracle-Spalte verwendet `VARCHAR2(255 CHAR)`;
+der Content-Type wird als `VARCHAR2(512 CHAR)` gespeichert. Sein Domain-Value-Object
+begrenzt ihn auf 512 Unicode-Codepoints einschließlich Parametern. Dies ist eine
+Anwendungsgrenze, keine MIME-Standardgrenze. Ungültige Werte werden ebenfalls vor
+dem Lesen des Inhalts mit HTTP 400 und `INVALID_UPLOAD` abgewiesen. Beide
+Value-Objects lehnen ungepaarte UTF-16-Surrogate ab. `ContentType` prüft zusätzlich
+die Medientyp-Syntax gemäß RFC 9110: `Typ/Subtyp` mit optionalen Parametern,
+deren Werte Tokens oder korrekt maskierte Zeichenketten in Anführungszeichen sind.
+Wildcards wie `text/*`, Header-Zeilenumbrüche und fehlerhafte Parameter sind
+unzulässig. Tokens enthalten nur die vorgesehenen ASCII-Zeichen; innerhalb von
+Anführungszeichen sind zusätzlich die historischen Bytewerte U+0080–U+00FF erlaubt,
+aber kein beliebiges Unicode. Damit entspricht `String.length()` für alle gültigen
+Werte der Codepoint-Anzahl. Leere Parameterabschnitte nach Semikola sind gemäß
+RFC 9110 erlaubt. Eine IANA-Registrierung oder typspezifische Parametersemantik wird
+nicht geprüft. Die Domain benötigt dafür keine Jakarta-Typen oder neue Abhängigkeiten.
+Bestehende syntaktisch ungültige Metadaten müssen vor dem Einlesen als Domain-Objekt
+bereinigt werden; eine automatische Migration erfolgt nicht.
+Der Content-Type stammt weiterhin vom
+Client und ist keine verifizierte Inhaltserkennung.
+
+Die übrigen Metadaten bleiben: eine typisierte UUID (`VARCHAR(36)` im Mapping),
+eine nichtnegative tatsächliche Bytezahl als `long` und der intern erzeugte,
+eindeutige Speicherschlüssel `<UUID>.bin` mit genau 40 ASCII-Zeichen.
+`FileContent` enthält keine Eingabegröße; die tatsächliche Bytezahl wird beim
+Einlesen ermittelt. Gespeicherte Größen sind nie negativ. Das Upload-Limit von
+25 MiB wird weiterhin beim Einlesen geprüft.
+
+Die JPA-Komponente ist eine CDI-Bean mit `@ApplicationScoped`, ohne EJBs.
+`@Transactional(NOT_SUPPORTED)` suspendiert eine aufrufende Transaktion;
+innerhalb der Methode steuert `UserTransaction` die eigene Transaktion explizit,
+damit Commit-Fehler unmittelbar ausgewertet werden können.
+Die JPA-Komponente schließt diese JTA-Transaktion ab, bevor der Upload
+erfolgreich beantwortet wird. Eine gegebenenfalls vorhandene aufrufende Transaktion
+wird während dieses Schritts suspendiert; ein späterer Rollback des Aufrufers macht
+den Upload nicht rückgängig. Dateisystem und Datenbank sind nicht gemeinsam atomar:
+Bei bestätigtem Datenbank-Rollback wird der Inhalt entfernt, bei unklarem
+Commit-Ergebnis bleibt er vorsichtshalber erhalten. Abbrüche des Prozesses oder
+fehlgeschlagene Bereinigung können verwaiste Dateien hinterlassen. Solche Fälle
+werden ohne Dateinamen oder Datenbankdetails protokolliert, soweit der Prozess
+noch läuft. Ein automatischer Bestandsabgleich ist nicht implementiert.
+
+Das lokale `drop-and-create` bleibt unverändert: Beim Neuerzeugen des Schemas
+gehen auch Dateimetadaten verloren, während die Dateien erhalten bleiben können.
+Bereits vorhandene `.bin`-Dateien werden nicht nachträglich importiert.
+
+Die JPA-Integrationstests verwenden Hibernate, H2 im Oracle-Kompatibilitätsmodus
+und Narayana mit echten XA-Transaktionen. Sie prüfen das Mapping, Sichtbarkeit
+nach Commit, Rollback sowie einen simulierten Verlust der Commit-Antwort nach
+einem echten Commit. Sie ersetzen keinen Laufzeittest der EAP-/Oracle-Verdrahtung.
+Ein zusätzlicher Weld-/Narayana-Test prüft, dass der CDI-Interceptor die
+Aufrufertransaktion sowohl bei Erfolg als auch bei Fehlern suspendiert und
+anschließend wieder aufnimmt. Weld SE ist für diese Tests auf die zu EAP 8.1
+passende CDI-4.0-Generation festgelegt.
+
 ## Entwicklungsumgebung pausieren und fortsetzen
 
 Zum Beenden der Container inklusive Dev Container und optionalem

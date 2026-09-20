@@ -18,6 +18,10 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>itz-filesystem-adapter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>itz-rest-adapter</artifactId>
     </dependency>
   </dependencies>

@@ -121,6 +121,22 @@ bundle            --> adapters (composition and deployment only)
 
 ## Build and verification
 
+### Local integration tests in the devcontainer
+
+The Compose services are reachable from the devcontainer through their Compose service names:
+
+- Keycloak: `http://keycloak:8080` (realm `itz`)
+- EAP application: `http://eap:8080`
+- EAP management: `http://eap:9990/management`
+- Oracle: hostname `oracle`, port `1521`
+
+Use `requests/requests.http` for API tests; the referenced environment variables
+`ITZ_TEST_USERNAME` and `ITZ_TEST_PASSWORD` must be set.
+The EAP management endpoint uses HTTP Digest authentication, not Basic authentication.
+The host port mappings from `compose.yaml` (for example, `127.0.0.1:8180` for
+Keycloak and `127.0.0.1:9990` for EAP management) are not the preferred route
+within the devcontainer; use the service names and container ports there.
+
 Run the narrowest useful check first, then the repository-level check before handoff:
 
 ```bash

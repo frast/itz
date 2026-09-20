@@ -3,6 +3,53 @@ info:
   title: ITZ API
   version: 0.1.0
 paths:
+  /files:
+    post:
+      tags:
+        - Files
+      operationId: uploadFile
+      summary: Laedt eine Datei hoch
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: entitypart
+                  description: >-
+                    Dateiname und Content-Type muessen gueltiges Unicode enthalten und duerfen nicht leer sein.
+                    Maximal 255 Unicode-Codepoints fuer den Dateinamen und 512 fuer den Content-Type einschliesslich Parametern.
+                    Content-Type muss ein konkreter Medientyp gemaess RFC 9110 mit syntaktisch gueltigen Parametern sein; Wildcards sind unzulaessig.
+                    Dateinamen duerfen weder . noch .. sein und keine Pfadtrenner (/ und Backslash),
+                    Sonderzeichen < > : " | ? *, ISO-Steuerzeichen, Unicode-Zeilentrenner U+2028/U+2029
+                    oder Bidi-Steuerzeichen U+061C, U+200E/U+200F, U+202A–U+202E, U+2066–U+2069 enthalten.
+                    Ohne Dateinamen wird upload.bin verwendet.
+      responses:
+        "201":
+          description: Datei wurde gespeichert
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileResponse"
+        "400":
+          description: Ungueltige Upload-Anfrage
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "413":
+          description: Datei ist zu gross
+        "422":
+          description: Datei wurde als infiziert erkannt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /ping:
     get:
       tags:
@@ -30,6 +77,39 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
+    FileResponse:
+      type: object
+      required:
+        - id
+        - filename
+        - contentType
+        - size
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: >-
+            Originaldateiname mit maximal 255 Unicode-Codepoints; reine Leerzeichen sind unzulaessig.
+            Weder . noch ..; keine Pfadtrenner (/ und Backslash), Sonderzeichen < > : " | ? *,
+            ISO-Steuerzeichen, Unicode-Zeilentrenner U+2028/U+2029 oder Bidi-Steuerzeichen
+            U+061C, U+200E/U+200F, U+202A–U+202E, U+2066–U+2069.
+        contentType:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Deklarierter konkreter Medientyp gemaess RFC 9110 einschliesslich syntaktisch gueltiger Parameter, ohne Wildcards, maximal 512 Unicode-Codepoints. Keine Pruefung der IANA-Registrierung oder des Dateiinhalts.
+        size:
+          type: integer
+          format: int64
+          minimum: 0
+        status:
+          type: string
+          enum: [STORED]
     PingResponse:
       type: object
       required:

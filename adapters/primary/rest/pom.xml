@@ -118,7 +118,10 @@
                 <dateLibrary>java8</dateLibrary>
                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                 <sourceFolder>src/main/java</sourceFolder>
+                <returnResponse>true</returnResponse>
               </configOptions>
+              <typeMappings>string+entitypart=EntityPart</typeMappings>
+              <importMappings>EntityPart=jakarta.ws.rs.core.EntityPart</importMappings>
             </configuration>
           </execution>
         </executions>

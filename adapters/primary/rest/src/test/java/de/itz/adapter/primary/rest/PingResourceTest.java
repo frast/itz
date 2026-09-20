@@ -14,6 +14,7 @@ import de.itz.application.security.CurrentUserContext;
 import de.itz.domain.security.Role;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 
 @EnableAutoWeld
 @AddBeanClasses({PingResource.class, PingApplicationService.class, RequestCurrentUserContext.class})
@@ -33,8 +34,9 @@ class PingResourceTest {
 
     @Test
     void mapsDomainResultToGeneratedResponse() {
-        PingResponse response = resource.ping();
+        Response response = resource.ping();
 
-        assertEquals("pong", response.getMessage());
+        assertEquals(200, response.getStatus());
+        assertEquals("pong", ((PingResponse) response.getEntity()).getMessage());
     }
 }

@@ -14,5 +14,6 @@
   <modules>
     <module>primary/rest</module>
     <module>secondary/jpa</module>
+    <module>secondary/filesystem</module>
   </modules>
 </project>

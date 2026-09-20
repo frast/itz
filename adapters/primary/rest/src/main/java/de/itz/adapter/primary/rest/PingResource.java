@@ -6,6 +6,7 @@ import de.itz.application.PingUseCase;
 import de.itz.domain.Ping;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 
 @RequestScoped
@@ -17,10 +18,10 @@ public class PingResource implements PingApi {
     private PingUseCase useCase;
 
     @Override
-    public PingResponse ping() {
+    public Response ping() {
         LOG.info("Handling ping request");
         Ping ping = useCase.execute();
         LOG.info("Ping request completed");
-        return new PingResponse(ping.message());
+        return Response.ok(new PingResponse(ping.message())).build();
     }
 }

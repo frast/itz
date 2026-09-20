@@ -20,5 +20,17 @@ client_id={{clientId}}
 GET {{eap}}/itz/api/ping
 Authorization: Bearer {{accessToken}}
 
+### Saubere Datei hochladen – erwartet HTTP 201
+POST {{eap}}/itz/api/files
+Authorization: Bearer {{accessToken}}
+Content-Type: multipart/form-data; boundary=itz-upload
+
+--itz-upload
+Content-Disposition: form-data; name="file"; filename="example.txt"
+Content-Type: text/plain
+
+This is a clean test upload.
+--itz-upload--
+
 ### Ohne JWT – erwartet HTTP 401
 GET {{eap}}/itz/api/ping
