@@ -26,32 +26,29 @@ public class UploadExceptionMapper implements ExceptionMapper<RuntimeException> 
                     "The request could not be completed");
         }
         LOG.errorf(exception, "File upload failed with %s", exception.getClass().getSimpleName());
-        if (exception instanceof FileUploadRejectedException) {
-            return response(Response.Status.fromStatusCode(422), "FILE_INFECTED",
+        return switch (exception) {
+            case FileUploadRejectedException rejected -> response(422, "FILE_INFECTED",
                     "The uploaded file was rejected by the virus scanner");
-        }
-        if (exception instanceof InvalidUploadException) {
-            return response(Response.Status.BAD_REQUEST, "INVALID_UPLOAD", "The upload request is invalid");
-        }
-        if (exception instanceof InvalidFileNameException) {
-            return response(Response.Status.BAD_REQUEST, "INVALID_UPLOAD",
+            case InvalidUploadException invalid -> response(Response.Status.BAD_REQUEST, "INVALID_UPLOAD",
+                    "The upload request is invalid");
+            case InvalidFileNameException invalid -> response(Response.Status.BAD_REQUEST, "INVALID_UPLOAD",
                     "The file name must be valid Unicode, nonblank and contain at most 255 characters");
-        }
-        if (exception instanceof InvalidContentTypeException) {
-            return response(Response.Status.BAD_REQUEST, "INVALID_UPLOAD",
+            case InvalidContentTypeException invalid -> response(Response.Status.BAD_REQUEST, "INVALID_UPLOAD",
                     "The content type must be valid Unicode, nonblank and contain at most 512 characters");
-        }
-        if (exception instanceof FileTooLargeException) {
-            return response(Response.Status.REQUEST_ENTITY_TOO_LARGE, "FILE_TOO_LARGE",
+            case FileTooLargeException tooLarge -> response(Response.Status.REQUEST_ENTITY_TOO_LARGE, "FILE_TOO_LARGE",
                     "The uploaded file is too large");
-        }
-        if (exception instanceof FileUploadException) {
-            return response(Response.Status.INTERNAL_SERVER_ERROR, "UPLOAD_FAILED", "The file could not be stored");
-        }
-        return response(Response.Status.INTERNAL_SERVER_ERROR, "REQUEST_FAILED", "The request could not be completed");
+            case FileUploadException failed -> response(Response.Status.INTERNAL_SERVER_ERROR, "UPLOAD_FAILED",
+                    "The file could not be stored");
+            default -> response(Response.Status.INTERNAL_SERVER_ERROR, "REQUEST_FAILED",
+                    "The request could not be completed");
+        };
     }
 
     private Response response(Response.Status status, String code, String message) {
+        return response(status.getStatusCode(), code, message);
+    }
+
+    private Response response(int status, String code, String message) {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE)
                 .entity(new ErrorResponse(code, message)).build();
     }
