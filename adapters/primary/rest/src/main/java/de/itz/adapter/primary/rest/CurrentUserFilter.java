@@ -1,10 +1,10 @@
 package de.itz.adapter.primary.rest;
 
 import java.security.Principal;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import de.itz.application.security.CurrentUser;
 import de.itz.application.security.Role;
@@ -21,6 +21,8 @@ import jakarta.ws.rs.ext.Provider;
 @Dependent
 @Priority(Priorities.AUTHENTICATION)
 public class CurrentUserFilter implements ContainerRequestFilter {
+    private static final Map<String, Role> ROLE_MAPPING = Map.of("user", Role.USER, "special", Role.SPECIAL, "admin",
+            Role.ADMIN);
     private final RequestCurrentUserContext currentUserContext;
 
     // RESTEasy 6.2 requires a public JAX-RS constructor before delegating creation to CDI.
@@ -40,8 +42,9 @@ public class CurrentUserFilter implements ContainerRequestFilter {
         Principal principal = Objects.requireNonNull(context.getUserPrincipal(),
                 "Authenticated request has no user principal");
         String principalName = Objects.requireNonNull(principal.getName(), "Authenticated user principal has no name");
-        Set<Role> roles = Stream.of(Role.values())
-                .filter(role -> context.isUserInRole(role.externalName()))
+        Set<Role> roles = ROLE_MAPPING.entrySet().stream()
+                .filter(role -> context.isUserInRole(role.getKey()))
+                .map(Map.Entry::getValue)
                 .collect(Collectors.toUnmodifiableSet());
         currentUserContext.initialize(new CurrentUser(principalName, roles));
     }
