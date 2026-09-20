@@ -16,7 +16,6 @@
     <dependency><groupId>jakarta.enterprise</groupId><artifactId>jakarta.enterprise.cdi-api</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>${project.groupId}</groupId><artifactId>itz-domain</artifactId></dependency>
     <dependency><groupId>org.jboss.weld</groupId><artifactId>weld-junit5</artifactId><scope>test</scope></dependency>
-    <dependency><groupId>jakarta.annotation</groupId><artifactId>jakarta.annotation-api</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>jakarta.transaction</groupId><artifactId>jakarta.transaction-api</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter-api</artifactId><scope>test</scope></dependency>
     <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter-engine</artifactId><scope>test</scope></dependency>
@@ -33,4 +32,18 @@
       <artifactId>jspecify</artifactId>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <!-- Match EAP's constructor requirements instead of Weld SE's relaxed default. -->
+            <org.jboss.weld.construction.relaxed>false</org.jboss.weld.construction.relaxed>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

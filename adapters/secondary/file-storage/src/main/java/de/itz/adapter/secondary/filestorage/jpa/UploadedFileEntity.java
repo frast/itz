@@ -30,6 +30,7 @@ public class UploadedFileEntity {
     private String storageKey = "";
 
     protected UploadedFileEntity() {
+        // Required by JPA.
     }
 
     UploadedFileEntity(UploadedFile file, String storageKey) {

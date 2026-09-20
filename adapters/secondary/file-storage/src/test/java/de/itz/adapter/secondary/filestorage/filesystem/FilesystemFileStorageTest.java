@@ -31,7 +31,7 @@ class FilesystemFileStorageTest {
     void storesMetadataAndInspectedBytesUnderId(@TempDir Path directory) throws Exception {
         List<UploadedFile> records = new ArrayList<>();
         List<String> calls = new ArrayList<>();
-        JpaFileMetadataStore metadata = new JpaFileMetadataStore() {
+        JpaFileMetadataStore metadata = new StubMetadataStore() {
             @Override
             public void save(UploadedFile file, String key) {
                 calls.add("save");
@@ -80,7 +80,7 @@ class FilesystemFileStorageTest {
     void deletesFinalContentOnlyForConfirmedRollback(@TempDir Path directory) throws Exception {
         for (boolean confirmed : List.of(true, false)) {
             Path root = directory.resolve(Boolean.toString(confirmed));
-            JpaFileMetadataStore metadata = new JpaFileMetadataStore() {
+            JpaFileMetadataStore metadata = new StubMetadataStore() {
                 @Override
                 public void save(UploadedFile file, String key) {
                     throw new FileMetadataStorageException(new RollbackException(), confirmed);
@@ -97,7 +97,7 @@ class FilesystemFileStorageTest {
 
     @Test
     void retainsContentForUnexpectedMetadataFailure(@TempDir Path directory) throws Exception {
-        JpaFileMetadataStore metadata = new JpaFileMetadataStore() {
+        JpaFileMetadataStore metadata = new StubMetadataStore() {
             @Override
             public void save(UploadedFile file, String key) {
                 throw new IllegalStateException();
@@ -111,7 +111,7 @@ class FilesystemFileStorageTest {
     @Test
     void enforcesLimitWhileReadingAndAcceptsBoundary(@TempDir Path directory) throws Exception {
         FilesystemFileStorage storage = new FilesystemFileStorage(directory, path -> {
-        }, new JpaFileMetadataStore() {
+        }, new StubMetadataStore() {
             @Override
             public void save(UploadedFile file, String key) {
             }
@@ -128,7 +128,7 @@ class FilesystemFileStorageTest {
     @Test
     void supportsEmptyContent(@TempDir Path directory) {
         FilesystemFileStorage storage = new FilesystemFileStorage(directory, new MockVirusScanner(),
-                new JpaFileMetadataStore() {
+                new StubMetadataStore() {
                     @Override
                     public void save(UploadedFile file, String key) {
                     }
@@ -163,12 +163,26 @@ class FilesystemFileStorageTest {
     }
 
     private JpaFileMetadataStore unusedStore() {
-        return new JpaFileMetadataStore() {
+        return new StubMetadataStore() {
             @Override
             public void save(UploadedFile file, String key) {
                 throw new AssertionError("Metadata must not be written");
             }
         };
+    }
+
+    private static class StubMetadataStore extends JpaFileMetadataStore {
+        private StubMetadataStore() {
+            super(unusedResource(jakarta.persistence.EntityManager.class),
+                    unusedResource(jakarta.transaction.UserTransaction.class));
+        }
+
+        private static <T> T unusedResource(Class<T> type) {
+            return type.cast(java.lang.reflect.Proxy.newProxyInstance(type.getClassLoader(),
+                    new Class<?>[]{type}, (proxy, method, arguments) -> {
+                        throw new AssertionError("Persistence resource must not be called");
+                    }));
+        }
     }
 
     private FileContent content(String text) {

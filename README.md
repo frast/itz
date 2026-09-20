@@ -101,7 +101,15 @@ eindeutige Speicherschlüssel `<UUID>.bin` mit genau 40 ASCII-Zeichen.
 Einlesen ermittelt. Gespeicherte Größen sind nie negativ. Das Upload-Limit von
 25 MiB wird weiterhin beim Einlesen geprüft.
 
-Die JPA-Komponente ist eine CDI-Bean mit `@ApplicationScoped`, ohne EJBs.
+Die JPA-Komponente ist eine CDI-Bean mit `@Dependent`, ohne EJBs. Ihre Instanz
+gehört dem injizierenden Speicheradapter. So benötigt sie keinen Normal-Scope-
+Client-Proxy und keinen zusätzlichen parameterlosen Konstruktor.
+`JpaFileMetadataStore` erhält `EntityManager` und `UserTransaction` über
+Constructor Injection. `PersistenceResources` stellt die vom Container injizierte
+`itzPU`-Referenz als `@Dependent`-Producer bereit; der Adapter erzeugt oder schließt
+keinen eigenen EntityManager. `UserTransaction` wird als eingebaute CDI-Bean von
+Jakarta EE bereitgestellt. Im Weld-SE-Test ersetzen Testressourcen die
+Ressourceninjektion des Application Servers.
 `@Transactional(NOT_SUPPORTED)` suspendiert eine aufrufende Transaktion;
 innerhalb der Methode steuert `UserTransaction` die eigene Transaktion explizit,
 damit Commit-Fehler unmittelbar ausgewertet werden können.
@@ -127,6 +135,9 @@ Ein zusätzlicher Weld-/Narayana-Test prüft, dass der CDI-Interceptor die
 Aufrufertransaktion sowohl bei Erfolg als auch bei Fehlern suspendiert und
 anschließend wieder aufnimmt. Weld SE ist für diese Tests auf die zu EAP 8.1
 passende CDI-4.0-Generation festgelegt.
+Im Speicheradapter ist `org.jboss.weld.construction.relaxed=false` für die Tests
+gesetzt, damit Weld SE fehlende Proxy-Konstruktoren nicht durch seine sonst
+standardmäßig aktivierte Sonderbehandlung verdeckt.
 
 ## Entwicklungsumgebung pausieren und fortsetzen
 

@@ -126,10 +126,7 @@ class JpaFileMetadataStoreTest {
     }
 
     private JpaFileMetadataStore store(EntityManager manager, UserTransaction transaction) {
-        JpaFileMetadataStore store = new JpaFileMetadataStore();
-        store.setEntityManager(manager);
-        store.setTransaction(transaction);
-        return store;
+        return new JpaFileMetadataStore(manager, transaction);
     }
 
     /** Enlists real H2 XA connections in Narayana; no transaction or database mocks. */

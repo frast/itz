@@ -19,22 +19,25 @@ import com.arjuna.ats.jta.cdi.transactional.TransactionalInterceptorNotSupported
 
 import de.itz.domain.file.UploadedFile;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Status;
 import jakarta.transaction.Transaction;
 import jakarta.transaction.TransactionManager;
+import jakarta.transaction.UserTransaction;
 
 @EnableAutoWeld
 @AddExtensions(TransactionExtension.class)
-@AddBeanClasses({JpaFileMetadataStoreCdiTest.TestStore.class,
+@AddBeanClasses({JpaFileMetadataStore.class, JpaFileMetadataStoreCdiTest.TestResources.class,
         TransactionalInterceptorNotSupported.class})
 class JpaFileMetadataStoreCdiTest {
     @Test
     void suspendsAndResumesCallerOnSuccessAndFailure() throws Exception {
         TransactionManager manager = com.arjuna.ats.jta.TransactionManager.transactionManager();
         @Nullable
-        TestStore store = CDI.current().select(TestStore.class).get();
+        JpaFileMetadataStore store = CDI.current().select(JpaFileMetadataStore.class).get();
+        TestResources resources = CDI.current().select(TestResources.class).get();
         for (boolean fail : new boolean[]{false, true}) {
             manager.begin();
             Transaction caller = manager.getTransaction();
@@ -47,9 +50,9 @@ class JpaFileMetadataStoreCdiTest {
                 }
                 assertSame(caller, manager.getTransaction());
                 assertEquals(Status.STATUS_ACTIVE, manager.getStatus());
-                assertNotSame(caller, store.persistedTransaction());
+                assertNotSame(caller, resources.persistedTransaction());
                 assertEquals(fail ? Status.STATUS_ROLLEDBACK : Status.STATUS_COMMITTED,
-                        store.persistedTransaction().getStatus());
+                        resources.persistedTransaction().getStatus());
             } finally {
                 manager.rollback();
             }
@@ -57,12 +60,19 @@ class JpaFileMetadataStoreCdiTest {
     }
 
     @ApplicationScoped
-    public static class TestStore extends JpaFileMetadataStore {
+    public static class TestResources {
         private java.util.Optional<Transaction> persisted = java.util.Optional.empty();
 
-        public TestStore() {
-            setTransaction(com.arjuna.ats.jta.UserTransaction.userTransaction());
-            setEntityManager((EntityManager) Proxy.newProxyInstance(EntityManager.class.getClassLoader(),
+        @Produces
+        UserTransaction transaction() {
+            return com.arjuna.ats.jta.UserTransaction.userTransaction();
+        }
+
+        @Produces
+        EntityManager entityManager() {
+            PersistenceResources resources = new PersistenceResources();
+            // Weld SE has no persistence container; simulate its injection callback.
+            resources.setEntityManager((EntityManager) Proxy.newProxyInstance(EntityManager.class.getClassLoader(),
                     new Class<?>[]{EntityManager.class}, (proxy, method, arguments) -> {
                         if (method.getName().equals("persist")) {
                             TransactionManager manager = com.arjuna.ats.jta.TransactionManager.transactionManager();
@@ -76,6 +86,7 @@ class JpaFileMetadataStoreCdiTest {
                         }
                         return null;
                     }));
+            return resources.entityManager();
         }
 
         public Transaction persistedTransaction() {
