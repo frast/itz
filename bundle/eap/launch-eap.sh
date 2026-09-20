@@ -3,7 +3,7 @@ set -euo pipefail
 
 eap_home="${JBOSS_HOME:-/opt/server}"
 "${eap_home}/bin/add-user.sh" -u "${EAP_MGMT_USER}" -p "${EAP_MGMT_PASSWORD}" -g SuperUser -s
-"${eap_home}/bin/standalone.sh" -b 0.0.0.0 -bmanagement 0.0.0.0 &
+"${eap_home}/bin/standalone.sh" --debug '*:8787' -b 0.0.0.0 -bmanagement 0.0.0.0 &
 server_pid=$!
 
 until "${eap_home}/bin/jboss-cli.sh" --connect --command=':read-attribute(name=server-state)' 2>/dev/null | grep -q running; do
