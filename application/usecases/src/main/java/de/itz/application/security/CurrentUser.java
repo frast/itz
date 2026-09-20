@@ -1,11 +1,13 @@
 package de.itz.application.security;
 
+import java.util.Objects;
 import java.util.Set;
 
 import de.itz.domain.security.Role;
 
 public record CurrentUser(String name, Set<Role> roles) {
     public CurrentUser {
+        Objects.requireNonNull(name, "name");
         roles = Set.copyOf(roles);
     }
 

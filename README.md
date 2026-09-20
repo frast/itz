@@ -166,6 +166,10 @@ Die Rollen aus Keycloak werden bereits als Jakarta-Sicherheitsrollen verfügbar
 gemacht und können später beispielsweise mit `@RolesAllowed("admin")` geprüft
 werden.
 
+`CurrentUser` sichert seinen Nicht-null-Vertrag für den Namen auch zur Laufzeit ab.
+Die Rollen werden als unveränderliche Kopie übernommen; spätere Änderungen an der
+übergebenen Menge verändern den Benutzerkontext nicht.
+
 Das importierte Realm wird nur beim ersten Initialisieren des persistenten
 Keycloak-Volumes wirksam.
 
