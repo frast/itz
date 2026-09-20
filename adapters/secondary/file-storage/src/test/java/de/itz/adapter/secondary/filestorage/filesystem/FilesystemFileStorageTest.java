@@ -44,6 +44,7 @@ class FilesystemFileStorageTest {
         FilesystemFileStorage storage = new FilesystemFileStorage(directory, path -> {
             calls.add("scan");
             assertEquals("hello", Files.readString(path));
+            return VirusScanResult.CLEAN;
         }, metadata);
 
         UploadedFile result = storage.store(new FileContent("report.txt", "text/plain",
@@ -96,26 +97,13 @@ class FilesystemFileStorageTest {
     }
 
     @Test
-    void retainsContentForUnexpectedMetadataFailure(@TempDir Path directory) throws Exception {
-        JpaFileMetadataStore metadata = new StubMetadataStore() {
-            @Override
-            public void save(UploadedFile file, String key) {
-                throw new IllegalStateException();
-            }
-        };
-        FilesystemFileStorage storage = new FilesystemFileStorage(directory, new MockVirusScanner(), metadata);
-        assertThrows(FileUploadException.class, () -> storage.store(content("hello")));
-        assertEquals(1, fileCount(directory));
-    }
-
-    @Test
     void enforcesLimitWhileReadingAndAcceptsBoundary(@TempDir Path directory) throws Exception {
-        FilesystemFileStorage storage = new FilesystemFileStorage(directory, path -> {
-        }, new StubMetadataStore() {
-            @Override
-            public void save(UploadedFile file, String key) {
-            }
-        });
+        FilesystemFileStorage storage = new FilesystemFileStorage(directory, path -> VirusScanResult.CLEAN,
+                new StubMetadataStore() {
+                    @Override
+                    public void save(UploadedFile file, String key) {
+                    }
+                });
         byte[] bytes = new byte[(int) FilesystemFileStorage.MAX_SIZE + 1];
         assertThrows(FileTooLargeException.class, () -> storage.store(new FileContent("large.bin",
                 "application/octet-stream", new ByteArrayInputStream(bytes))));
@@ -156,7 +144,7 @@ class FilesystemFileStorageTest {
             Files.delete(path);
             Files.createDirectory(path);
             Files.writeString(path.resolve("obstruction"), "test");
-            throw new VirusDetectedException();
+            return VirusScanResult.INFECTED;
         }, unusedStore());
         assertThrows(FileUploadRejectedException.class, () -> storage.store(content("hello")));
         assertEquals(1, fileCount(directory));

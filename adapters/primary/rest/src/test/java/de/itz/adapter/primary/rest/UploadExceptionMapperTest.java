@@ -17,7 +17,7 @@ import jakarta.ws.rs.core.Response;
 class UploadExceptionMapperTest {
     @Test
     void mapsRejectedFile() {
-        assertResponse(new FileUploadRejectedException(new IllegalStateException("Internal detail")),
+        assertResponse(new FileUploadRejectedException(),
                 422, "FILE_INFECTED", "The uploaded file was rejected by the virus scanner");
     }
 

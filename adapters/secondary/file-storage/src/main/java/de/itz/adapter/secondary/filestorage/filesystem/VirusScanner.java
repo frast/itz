@@ -4,5 +4,5 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public interface VirusScanner {
-    void scan(Path quarantinedFile) throws IOException, VirusDetectedException;
+    VirusScanResult scan(Path quarantinedFile) throws IOException;
 }

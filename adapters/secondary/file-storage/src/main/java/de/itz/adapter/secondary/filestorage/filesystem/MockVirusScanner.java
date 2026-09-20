@@ -12,10 +12,8 @@ public class MockVirusScanner implements VirusScanner {
     private static final String EICAR_MARKER = "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
 
     @Override
-    public void scan(Path quarantinedFile) throws IOException, VirusDetectedException {
+    public VirusScanResult scan(Path quarantinedFile) throws IOException {
         String content = Files.readString(quarantinedFile, StandardCharsets.ISO_8859_1);
-        if (content.contains(EICAR_MARKER)) {
-            throw new VirusDetectedException();
-        }
+        return (content.contains(EICAR_MARKER)) ? VirusScanResult.INFECTED : VirusScanResult.CLEAN;
     }
 }

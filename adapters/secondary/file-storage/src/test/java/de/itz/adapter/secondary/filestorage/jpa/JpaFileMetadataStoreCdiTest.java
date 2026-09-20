@@ -37,6 +37,7 @@ class JpaFileMetadataStoreCdiTest {
         TransactionManager manager = com.arjuna.ats.jta.TransactionManager.transactionManager();
         @Nullable
         JpaFileMetadataStore store = CDI.current().select(JpaFileMetadataStore.class).get();
+        @Nullable
         TestResources resources = CDI.current().select(TestResources.class).get();
         for (boolean fail : new boolean[]{false, true}) {
             manager.begin();

@@ -49,7 +49,10 @@ public class FilesystemFileStorage implements FileStorage {
             Files.createDirectories(root);
             quarantine = Files.createTempFile(root, ".upload-", ".tmp");
             long size = copyContent(content, quarantine);
-            scanner.scan(quarantine);
+            VirusScanResult scanResult = scanner.scan(quarantine);
+            if (scanResult == VirusScanResult.INFECTED) {
+                throw new FileUploadRejectedException();
+            }
             UUID id = UUID.randomUUID();
             String storageKey = id + ".bin";
             UploadedFile result = new UploadedFile(id, content.filename(), content.contentType(), size);
@@ -58,11 +61,7 @@ public class FilesystemFileStorage implements FileStorage {
             metadataAttempted = true;
             metadataStore.save(result, storageKey);
             return result;
-        } catch (VirusDetectedException exception) {
-            throw new FileUploadRejectedException(exception);
-        } catch (FileTooLargeException exception) {
-            throw exception;
-        } catch (IOException | RuntimeException exception) {
+        } catch (IOException | FileMetadataStorageException exception) {
             if (!metadataAttempted || (exception instanceof FileMetadataStorageException failure
                     && failure.rollbackConfirmed())) {
                 cleanup(target);

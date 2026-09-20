@@ -51,7 +51,7 @@ class FileUploadApplicationServiceTest {
     @Test
     void propagatesStorageFailures() {
         for (RuntimeException failure : List.of(new FileUploadException(new IllegalStateException()),
-                new FileUploadRejectedException(new IllegalStateException()), new FileTooLargeException())) {
+                new FileUploadRejectedException(), new FileTooLargeException())) {
             FileUploadApplicationService service = new FileUploadApplicationService(
                     () -> new CurrentUser("user", Set.of(Role.USER)), input -> {
                         throw failure;
