@@ -77,9 +77,16 @@ bundle            --> adapters (composition and deployment only)
 - Favor small cohesive classes, constructor injection, immutable state, and explicit
   return types. Avoid field injection, service locators, global mutable state, and
   nullable values as implicit control flow.
-- Field injection is permitted only for REST controllers/resources where the framework
-  supplies the controller dependency; all other application and adapter components must
-  use constructor injection (or an explicit framework callback such as `@Context`).
+- Use constructor injection for all application and adapter dependencies, including REST
+  resources and filters: an `@Inject` constructor and `private final` dependency fields.
+  Do not use field injection or `CDI.current()` to obtain application dependencies.
+  Container-managed resources such as `@PersistenceContext` belong in dedicated resource
+  producers. JPA entity no-argument constructors are a separate persistence requirement.
+- RESTEasy 6.2 requires a public compatible constructor before delegating to CDI.
+  Keep the public no-argument compatibility constructors for REST providers/resources.
+  Normal-scoped resource constructors must allow CDI proxy construction without throwing;
+  their fallback dependencies may fail on use. The `@Dependent` filter does not require
+  a client proxy and may reject direct no-argument construction.
 - Keep methods focused. Extract a concept when it has a domain name or removes genuine
   duplication; do not create abstractions for a single speculative future use.
 - Use exceptions for exceptional failures, not expected branching. Map domain and
@@ -116,6 +123,10 @@ bundle            --> adapters (composition and deployment only)
 - Adapter tests verify mapping, validation, protocol/persistence behavior, and error
   translation. Use integration tests only where the framework or database behavior is
   material.
+- Construct subjects directly with fake or lambda dependencies in behavior tests; do not
+  boot Weld solely to inject them. Keep focused CDI tests for wiring, normal-scope proxies,
+  and interceptors, plus RESTEasy constructor-selection regression tests. Run Weld tests
+  with `org.jboss.weld.construction.relaxed=false` so proxy-constructor defects remain visible.
 - Add architecture tests when practical to enforce the dependency rule and prevent
   Jakarta/JPA imports in the domain.
 - Cover the happy path, boundary values, invalid input, invariant violations, and relevant

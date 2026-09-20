@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -31,16 +32,13 @@ class FilesystemFileStorageTest {
     void storesMetadataAndInspectedBytesUnderId(@TempDir Path directory) throws Exception {
         List<UploadedFile> records = new ArrayList<>();
         List<String> calls = new ArrayList<>();
-        JpaFileMetadataStore metadata = new StubMetadataStore() {
-            @Override
-            public void save(UploadedFile file, String key) {
-                calls.add("save");
-                records.add(file);
-                assertEquals(file.id() + ".bin", key);
-                assertEquals(40, key.length());
-                assertTrue(Files.exists(directory.resolve(key)));
-            }
-        };
+        JpaFileMetadataStore metadata = new StubMetadataStore((file, key) -> {
+            calls.add("save");
+            records.add(file);
+            assertEquals(file.id() + ".bin", key);
+            assertEquals(40, key.length());
+            assertTrue(Files.exists(directory.resolve(key)));
+        });
         FilesystemFileStorage storage = new FilesystemFileStorage(directory, path -> {
             calls.add("scan");
             assertEquals("hello", Files.readString(path));
@@ -81,12 +79,9 @@ class FilesystemFileStorageTest {
     void deletesFinalContentOnlyForConfirmedRollback(@TempDir Path directory) throws Exception {
         for (boolean confirmed : List.of(true, false)) {
             Path root = directory.resolve(Boolean.toString(confirmed));
-            JpaFileMetadataStore metadata = new StubMetadataStore() {
-                @Override
-                public void save(UploadedFile file, String key) {
-                    throw new FileMetadataStorageException(new RollbackException(), confirmed);
-                }
-            };
+            JpaFileMetadataStore metadata = new StubMetadataStore((file, key) -> {
+                throw new FileMetadataStorageException(new RollbackException(), confirmed);
+            });
             FilesystemFileStorage storage = new FilesystemFileStorage(root, new MockVirusScanner(), metadata);
             assertThrows(FileUploadException.class, () -> storage.store(content("hello")));
             assertEquals(confirmed ? 0 : 1, fileCount(root));
@@ -99,11 +94,8 @@ class FilesystemFileStorageTest {
     @Test
     void enforcesLimitWhileReadingAndAcceptsBoundary(@TempDir Path directory) throws Exception {
         FilesystemFileStorage storage = new FilesystemFileStorage(directory, path -> VirusScanResult.CLEAN,
-                new StubMetadataStore() {
-                    @Override
-                    public void save(UploadedFile file, String key) {
-                    }
-                });
+                new StubMetadataStore((file, key) -> {
+                }));
         byte[] bytes = new byte[(int) FilesystemFileStorage.MAX_SIZE + 1];
         assertThrows(FileTooLargeException.class, () -> storage.store(new FileContent("large.bin",
                 "application/octet-stream", new ByteArrayInputStream(bytes))));
@@ -116,11 +108,8 @@ class FilesystemFileStorageTest {
     @Test
     void supportsEmptyContent(@TempDir Path directory) {
         FilesystemFileStorage storage = new FilesystemFileStorage(directory, new MockVirusScanner(),
-                new StubMetadataStore() {
-                    @Override
-                    public void save(UploadedFile file, String key) {
-                    }
-                });
+                new StubMetadataStore((file, key) -> {
+                }));
         assertEquals(0, storage.store(content("")).size());
     }
 
@@ -153,18 +142,23 @@ class FilesystemFileStorageTest {
     }
 
     private JpaFileMetadataStore unusedStore() {
-        return new StubMetadataStore() {
-            @Override
-            public void save(UploadedFile file, String key) {
-                throw new AssertionError("Metadata must not be written");
-            }
-        };
+        return new StubMetadataStore((file, key) -> {
+            throw new AssertionError("Metadata must not be written");
+        });
     }
 
-    private static class StubMetadataStore extends JpaFileMetadataStore {
-        private StubMetadataStore() {
+    private static final class StubMetadataStore extends JpaFileMetadataStore {
+        private final BiConsumer<UploadedFile, String> save;
+
+        private StubMetadataStore(BiConsumer<UploadedFile, String> save) {
             super(unusedResource(jakarta.persistence.EntityManager.class),
                     unusedResource(jakarta.transaction.UserTransaction.class));
+            this.save = save;
+        }
+
+        @Override
+        public void save(UploadedFile file, String key) {
+            save.accept(file, key);
         }
 
         private static <T> T unusedResource(Class<T> type) {

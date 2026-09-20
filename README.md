@@ -490,6 +490,22 @@ Datenbank-Volumes. Fuer das Einrichten oder Testen der Logs ist das nicht notwen
 Application Services verwenden den CDI-Stereotyp `@ApplicationService`, der
 `@ApplicationScoped` vorgibt.
 
+`CurrentUserFilter` erhält den Benutzerkontext über CDI-Constructor-Injection und
+liest den JAX-RS-Sicherheitskontext direkt aus `ContainerRequestContext`.
+RESTEasy 6.2 benötigt für die Provider-Erkennung zusätzlich einen öffentlichen
+parameterlosen Konstruktor, bevor es die Instanzerzeugung an CDI delegiert.
+Dieser Kompatibilitätskonstruktor darf nicht aufgerufen werden und wirft deshalb
+eine Exception; CDI verwendet den mit `@Inject` markierten Konstruktor.
+
+Die `@RequestScoped`-Controller `PingResource` und `FilesResource` verwenden
+ebenfalls Constructor Injection. Ihre öffentlichen parameterlosen Konstruktoren
+müssen zusätzlich die CDI-Proxy-Erzeugung erlauben und dürfen daher nicht werfen.
+Sie hinterlegen einen Use Case, der erst beim direkten Aufruf ohne CDI eine
+Exception auslöst; reguläre Proxy-Aufrufe werden an die injizierte Bean delegiert.
+Die REST-Tests setzen `org.jboss.weld.construction.relaxed=false`, damit Weld SE
+diese Konstruktoren tatsächlich aufruft. Zusätzlich prüfen sie die
+RESTEasy-Konstruktorauswahl für die Controller.
+
 ## Codeformatierung
 
 VS Code formatiert Java-Dateien beim Speichern mit dem eingecheckten Profil

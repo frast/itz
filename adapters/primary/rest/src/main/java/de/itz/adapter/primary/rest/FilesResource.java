@@ -8,9 +8,9 @@ import de.itz.adapter.primary.rest.generated.api.FilesApi;
 import de.itz.adapter.primary.rest.generated.model.FileResponse;
 import de.itz.application.file.FileContent;
 import de.itz.application.file.UploadFileUseCase;
-import de.itz.domain.file.UploadedFile;
-import de.itz.domain.file.FileName;
 import de.itz.domain.file.ContentType;
+import de.itz.domain.file.FileName;
+import de.itz.domain.file.UploadedFile;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -24,8 +24,19 @@ import jakarta.ws.rs.core.Response;
 @RequestScoped
 @Path("/files")
 public class FilesResource implements FilesApi {
+    private final UploadFileUseCase uploadFileUseCase;
+
+    // RESTEasy requires public visibility; CDI client proxies must be able to call this constructor.
+    public FilesResource() {
+        this(content -> {
+            throw new IllegalStateException("FilesResource must be constructed by CDI");
+        });
+    }
+
     @Inject
-    private UploadFileUseCase uploadFileUseCase;
+    public FilesResource(UploadFileUseCase uploadFileUseCase) {
+        this.uploadFileUseCase = uploadFileUseCase;
+    }
 
     @Override
     @POST

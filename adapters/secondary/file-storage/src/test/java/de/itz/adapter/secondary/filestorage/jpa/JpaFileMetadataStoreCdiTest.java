@@ -11,7 +11,6 @@ import java.util.UUID;
 import org.jboss.weld.junit5.auto.AddBeanClasses;
 import org.jboss.weld.junit5.auto.AddExtensions;
 import org.jboss.weld.junit5.auto.EnableAutoWeld;
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import com.arjuna.ats.jta.cdi.TransactionExtension;
@@ -20,7 +19,7 @@ import com.arjuna.ats.jta.cdi.transactional.TransactionalInterceptorNotSupported
 import de.itz.domain.file.UploadedFile;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.spi.CDI;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Status;
 import jakarta.transaction.Transaction;
@@ -32,13 +31,15 @@ import jakarta.transaction.UserTransaction;
 @AddBeanClasses({JpaFileMetadataStore.class, JpaFileMetadataStoreCdiTest.TestResources.class,
         TransactionalInterceptorNotSupported.class})
 class JpaFileMetadataStoreCdiTest {
+    @Inject
+    private JpaFileMetadataStore store;
+
+    @Inject
+    private TestResources resources;
+
     @Test
     void suspendsAndResumesCallerOnSuccessAndFailure() throws Exception {
         TransactionManager manager = com.arjuna.ats.jta.TransactionManager.transactionManager();
-        @Nullable
-        JpaFileMetadataStore store = CDI.current().select(JpaFileMetadataStore.class).get();
-        @Nullable
-        TestResources resources = CDI.current().select(TestResources.class).get();
         for (boolean fail : new boolean[]{false, true}) {
             manager.begin();
             Transaction caller = manager.getTransaction();
