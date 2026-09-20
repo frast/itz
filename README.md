@@ -502,7 +502,25 @@ Formatierung waehrend der `verify`-Phase.
 ./mvnw verify          # Vollstaendiger Build inklusive Formatierungspruefung
 ```
 
-## Nullness-Pruefung
+## Statische Analyse und Nullness-Pruefung
+
+Maven fuehrt bei der Kompilierung von Produktions- und Testcode die
+Standardpruefungen von Error Prone mit ihren vorgesehenen Schweregraden aus.
+Fehler brechen den Build ab; Warnungen werden nicht pauschal zu Fehlern hochgestuft.
+Die Pruefungen decken unter anderem ignorierte Rueckgabewerte, fehlerhafte
+Gleichheitsvergleiche und ungueltige API-Aufrufe ab. Die konkrete Auswahl folgt
+der im Root-POM festgelegten Error-Prone-Version.
+
+Neue Warnungen werden bewertet und moeglichst behoben. Notwendige
+`@SuppressWarnings` werden auf den kleinsten sinnvollen Bereich begrenzt und
+mit einer Begruendung versehen. Bei Versionsupdates werden neue Standardchecks
+und ihre Befunde im selben Review bewertet. Zusaetzliche verbindliche Checks
+sollen nachvollziehbare Fehler mit klaren Korrekturen und wenigen Fehlalarmen
+erkennen. Architekturgrenzen und Jakarta-Laufzeitverhalten werden weiterhin
+durch passende Tests abgesichert.
+
+Quellen unter `target/generated-sources` sind von Error Prone und NullAway
+ausgenommen; generierter Code wird nicht manuell korrigiert.
 
 Eigener Java-Code ist paketweise mit JSpecify `@NullMarked` als standardmaessig
 nicht-null markiert. Nur Typen, fuer die `null` ein gueltiger Zustand ist, werden
@@ -519,7 +537,7 @@ werden weiterhin als Java-Diagnosen angezeigt; die vollstaendige Build-Pruefung 
 NullAway.
 
 ```bash
-./mvnw verify  # inklusive NullAway-Pruefung
+./mvnw verify  # inklusive Error-Prone- und NullAway-Pruefung
 ```
 
 ## Datenbankmodus

@@ -11,7 +11,6 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -132,7 +131,7 @@ class JpaFileMetadataStoreTest {
     /** Enlists real H2 XA connections in Narayana; no transaction or database mocks. */
     private static final class XaConnections implements ConnectionProvider, AutoCloseable {
         private final JdbcDataSource dataSource = new JdbcDataSource();
-        private final Map<Connection, XAConnection> connections = new IdentityHashMap<>();
+        private final IdentityHashMap<Connection, XAConnection> connections = new IdentityHashMap<>();
 
         private XaConnections() {
             dataSource.setURL("jdbc:h2:mem:" + UUID.randomUUID() + ";DB_CLOSE_DELAY=-1;MODE=Oracle");

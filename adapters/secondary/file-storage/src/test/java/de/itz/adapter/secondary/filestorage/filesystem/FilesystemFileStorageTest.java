@@ -126,6 +126,8 @@ class FilesystemFileStorageTest {
 
     @Test
     void cleansPartialUploadAfterReadFailure(@TempDir Path directory) throws Exception {
+        // Every read fails immediately; this test stream never performs a multibyte read loop.
+        @SuppressWarnings("InputStreamSlowMultibyteRead")
         InputStream input = new InputStream() {
             @Override
             public int read() throws IOException {

@@ -14,6 +14,6 @@ public class MockVirusScanner implements VirusScanner {
     @Override
     public VirusScanResult scan(Path quarantinedFile) throws IOException {
         String content = Files.readString(quarantinedFile, StandardCharsets.ISO_8859_1);
-        return (content.contains(EICAR_MARKER)) ? VirusScanResult.INFECTED : VirusScanResult.CLEAN;
+        return content.contains(EICAR_MARKER) ? VirusScanResult.INFECTED : VirusScanResult.CLEAN;
     }
 }

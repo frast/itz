@@ -123,6 +123,13 @@ bundle            --> adapters (composition and deployment only)
 
 ## Build and verification
 
+- Keep Error Prone's default checks enabled for production and test compilation,
+  alongside NullAway. Evaluate new warnings rather than promoting all warnings to errors.
+- Keep suppressions local and explain why the reported code is correct. Do not disable
+  checks globally to bypass individual findings or edit generated sources to silence them.
+- Review new default checks and findings when upgrading Error Prone. Additional mandatory
+  checks should catch clear correctness issues with actionable fixes and few false positives.
+
 ### Local integration tests in the devcontainer
 
 The Compose services are reachable from the devcontainer through their Compose service names:

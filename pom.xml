@@ -255,7 +255,7 @@
               <arg>-XDcompilePolicy=simple</arg>
               <arg>--should-stop=ifError=FLOW</arg>
               <arg>-XDaddTypeAnnotationsToSymbol=true</arg>
-              <arg>-Xplugin:ErrorProne -XepDisableAllChecks -Xep:NullAway:ERROR
+              <arg>-Xplugin:ErrorProne -Xep:NullAway:ERROR
                 -Xep:RequireExplicitNullMarking:ERROR -XepOpt:NullAway:OnlyNullMarked=true
                 -XepOpt:NullAway:ExcludedFieldAnnotations=jakarta.inject.Inject,jakarta.ws.rs.core.Context
                 -XepExcludedPaths:.*/target/generated-sources/.*</arg>
