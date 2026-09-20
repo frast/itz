@@ -13,7 +13,6 @@
   <packaging>pom</packaging>
   <modules>
     <module>primary/rest</module>
-    <module>secondary/jpa</module>
-    <module>secondary/filesystem</module>
+    <module>secondary/file-storage</module>
   </modules>
 </project>

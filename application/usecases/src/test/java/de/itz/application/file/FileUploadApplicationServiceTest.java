@@ -13,7 +13,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 import de.itz.application.security.CurrentUser;
+import de.itz.application.security.ForbiddenException;
 import de.itz.domain.file.UploadedFile;
+import de.itz.domain.security.Role;
 
 class FileUploadApplicationServiceTest {
     @Test
@@ -23,7 +25,7 @@ class FileUploadApplicationServiceTest {
         UploadedFile stored = new UploadedFile(UUID.randomUUID(), "upload.txt", "text/plain", 0);
         FileUploadApplicationService service = new FileUploadApplicationService(() -> {
             calls.add("authenticate");
-            return new CurrentUser("user", Set.of());
+            return new CurrentUser("user", Set.of(Role.USER));
         }, input -> {
             calls.add("store");
             assertSame(content, input);
@@ -51,11 +53,21 @@ class FileUploadApplicationServiceTest {
         for (RuntimeException failure : List.of(new FileUploadException(new IllegalStateException()),
                 new FileUploadRejectedException(new IllegalStateException()), new FileTooLargeException())) {
             FileUploadApplicationService service = new FileUploadApplicationService(
-                    () -> new CurrentUser("user", Set.of()), input -> {
+                    () -> new CurrentUser("user", Set.of(Role.USER)), input -> {
                         throw failure;
                     });
             assertSame(failure, assertThrows(RuntimeException.class, () -> service.execute(content())));
         }
+    }
+
+    @Test
+    void doesNotStoreWithoutUserRole() {
+        FileUploadApplicationService service = new FileUploadApplicationService(
+                () -> new CurrentUser("user", Set.of()), input -> {
+                    throw new AssertionError("Storage must not be called");
+                });
+
+        assertThrows(ForbiddenException.class, () -> service.execute(content()));
     }
 
     private FileContent content() {

@@ -21,7 +21,7 @@ Die Anwendung ist danach unter http://localhost:8080/itz/api/ping erreichbar. Di
 API erwartet einen gültigen JWT-Bearer-Token aus dem lokalen Keycloak.
 
 Datei-Uploads erfolgen über `POST /itz/api/files` als Multipart-Feld `file` und
-erfordern ebenfalls einen gültigen JWT-Bearer-Token. Dateien bis 25 MiB werden
+erfordern ebenfalls einen gültigen JWT-Bearer-Token sowie die Rolle `user`. Dateien bis 25 MiB werden
 zunächst in Quarantäne geschrieben, durch den lokalen Mock-Virenscanner geprüft
 und danach im konfigurierten Dateiverzeichnis gespeichert. Das Verzeichnis wird
 über `ITZ_FILE_STORAGE_DIRECTORY` oder die JVM-Systemeigenschaft
@@ -29,10 +29,29 @@ und danach im konfigurierten Dateiverzeichnis gespeichert. Das Verzeichnis wird
 Der EICAR-Testmarker wird als infiziert abgewiesen und mit HTTP 422 beantwortet.
 
 Der Application Core ruft dafür ausschließlich `FileStorage.store(...)` auf.
-Der Dateisystemadapter übernimmt Größenprüfung beim Einlesen,
+Der gemeinsame Speicheradapter übernimmt Größenprüfung beim Einlesen,
 Quarantäne, Virenscan und die koordinierte Speicherung. Bei einem Scanner-Ausfall
 wird der Upload abgebrochen. Der vorhandene Scanner ist weiterhin ein lokaler
 Mock und kein produktiver Virenschutz.
+
+Das Maven-Modul `adapters/secondary/file-storage` (`itz-file-storage-adapter`)
+implementiert den Application-Port `FileStorage`. Es fasst Dateiablage,
+technische Virenprüfung und JPA-Metadatenpersistenz zusammen. Die getrennten
+Klassen liegen in den internen Paketen `de.itz.adapter.secondary.filestorage.filesystem`
+und `de.itz.adapter.secondary.filestorage.jpa`. `FilesystemFileStorage` koordiniert
+den Ablauf und verwendet intern `VirusScanner` und `JpaFileMetadataStore`.
+Domain und Application erhalten keine Scanner- oder JPA-Abhängigkeiten; ein
+zusätzlicher Application-Port für die Metadatenspeicherung ist nicht erforderlich.
+Die bisherigen Maven-Module `secondary/filesystem` und `secondary/jpa` entfallen.
+Die Persistence Unit `itzPU` liegt im gemeinsamen Adapter-JAR, das im WAR unter
+`WEB-INF/lib` ausgeliefert wird. Transaktions- und Bereinigungsverhalten bleiben
+unverändert; Dateiablage und Datenbank sind weiterhin nicht gemeinsam atomar.
+
+Tests des gemeinsamen Adapters ausführen:
+
+```bash
+./mvnw -pl adapters/secondary/file-storage -am test
+```
 
 Dateiinhalte liegen unter `<UUID>.bin`; der Originaldateiname wird niemals als
 Dateipfad verwendet. Die Tabelle `uploaded_file` enthält UUID, Originaldateiname,

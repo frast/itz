@@ -14,11 +14,7 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>itz-jpa-adapter</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>itz-filesystem-adapter</artifactId>
+      <artifactId>itz-file-storage-adapter</artifactId>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>

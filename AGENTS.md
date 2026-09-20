@@ -94,7 +94,9 @@ bundle            --> adapters (composition and deployment only)
 
 ## Persistence and API changes
 
-- Keep JPA mappings in `adapters/secondary/jpa`; map explicitly to and from domain types.
+- Keep JPA mappings in the `filestorage.jpa` package of `adapters/secondary/file-storage`;
+  map explicitly to and from domain types. File storage, virus scanning, and metadata
+  persistence are internal components of this single outbound adapter.
 - Treat schema changes as compatibility-sensitive. The current local persistence unit
   uses `drop-and-create`; do not mistake that for a production migration strategy.
 - Do not introduce Liquibase or change schema-generation behavior without updating the
