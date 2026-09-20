@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import de.itz.application.security.CurrentUser;
-import de.itz.domain.security.Role;
+import de.itz.application.security.Role;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;

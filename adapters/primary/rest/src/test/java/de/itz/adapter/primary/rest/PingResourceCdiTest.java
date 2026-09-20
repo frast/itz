@@ -13,7 +13,7 @@ import de.itz.adapter.primary.rest.generated.model.PingResponse;
 import de.itz.application.PingApplicationService;
 import de.itz.application.security.CurrentUser;
 import de.itz.application.security.CurrentUserContext;
-import de.itz.domain.security.Role;
+import de.itz.application.security.Role;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;

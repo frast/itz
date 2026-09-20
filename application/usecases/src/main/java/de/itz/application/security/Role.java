@@ -1,4 +1,4 @@
-package de.itz.domain.security;
+package de.itz.application.security;
 
 public enum Role {
     USER("user"), ADMIN("admin"), SPECIAL("special");

@@ -11,7 +11,7 @@ import de.itz.adapter.primary.rest.generated.model.ErrorResponse;
 import de.itz.application.PingApplicationService;
 import de.itz.application.security.CurrentUser;
 import de.itz.application.security.ForbiddenException;
-import de.itz.domain.security.Role;
+import de.itz.application.security.Role;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 

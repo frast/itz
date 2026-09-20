@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 
 import de.itz.application.security.CurrentUser;
 import de.itz.application.security.ForbiddenException;
+import de.itz.application.security.Role;
 import de.itz.domain.file.UploadedFile;
-import de.itz.domain.security.Role;
 
 class FileUploadApplicationServiceTest {
     @Test
