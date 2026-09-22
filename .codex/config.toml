@@ -1,20 +1,6 @@
-default_permissions = "devcontainer"
+approval_policy = "on-request"
+sandbox_mode = "danger-full-access"
+web_search = "live"
 
 [features]
-network_proxy = true
-
-[permissions.devcontainer]
-extends = ":workspace"
-
-[permissions.devcontainer.network]
-enabled = true
-allow_local_binding = true
-
-[permissions.devcontainer.network.domains]
-"keycloak" = "allow"
-"oracle" = "allow"
-"eap" = "allow"
-"loki" = "allow"
-"alloy" = "allow"
-"grafana" = "allow"
-"127.0.0.1" = "allow"
+multi_agent = true

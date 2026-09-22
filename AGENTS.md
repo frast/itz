@@ -56,9 +56,10 @@ bundle            --> adapters (composition and deployment only)
   Avoid vague suffixes and generic containers such as `Manager`, `Helper`, or `Common`.
 - An aggregate root is the only entry point for changing its aggregate. Enforce
   invariants in constructors, named factories, and behavior methods; do not create
-  anemic models with public setters.
-- Prefer immutable value objects and records when identity and mutable lifecycle are not
-  required. Validate them at creation so invalid instances cannot exist.
+  anemic models with public setters. Model types so invalid or inconsistent states
+  cannot be represented, and validate inputs at their creation boundary.
+- Model value objects as immutable records when identity and mutable lifecycle are not
+  required. Keep validation and any derived behavior with the value they protect.
 - Reference other aggregates by identity. Keep transactions and consistency boundaries
   small; use domain events for consequences that need not be atomic.
 - Repositories model aggregate persistence, not tables or generic CRUD. Return domain
@@ -70,8 +71,12 @@ bundle            --> adapters (composition and deployment only)
 
 ## Java and Jakarta EE guidelines
 
-- Target Java 21 and use language features that improve clarity without reducing EAP
-  compatibility.
+- Target Java 21 and prefer its modern language features when they make code clearer,
+  while preserving EAP compatibility. Use sealed interfaces with explicit `permits`
+  clauses when a closed set of implementations is part of the model.
+- Prefer functional composition and immutable transformations when they make control
+  flow simpler. Keep imperative code when it is clearer or is required for resource,
+  transaction, or framework lifecycle management.
 - Follow normal Java conventions: four-space indentation, one public top-level type per
   file, descriptive names, braces for control flow, and no wildcard imports.
 - Favor small cohesive classes, constructor injection, immutable state, and explicit
@@ -129,8 +134,13 @@ bundle            --> adapters (composition and deployment only)
   with `org.jboss.weld.construction.relaxed=false` so proxy-constructor defects remain visible.
 - Add architecture tests when practical to enforce the dependency rule and prevent
   Jakarta/JPA imports in the domain.
-- Cover the happy path, boundary values, invalid input, invariant violations, and relevant
-  failure paths. Avoid brittle tests of generated SQL, incidental ordering, or formatting.
+- Cover happy paths, boundaries, invalid input, invariant violations, and relevant
+  failures. Avoid tests of generated SQL, incidental ordering, or formatting.
+
+For Codex, use the read-only `architecture-reviewer` subagent when a change crosses two
+or more application, adapter, or bundle boundaries. Ask it to review the completed diff
+for architecture, API, persistence, and test risks. Skip delegation for single-module
+changes.
 
 ## Build and verification
 
@@ -141,7 +151,13 @@ bundle            --> adapters (composition and deployment only)
 - Review new default checks and findings when upgrading Error Prone. Additional mandatory
   checks should catch clear correctness issues with actionable fixes and few false positives.
 
-### Local integration tests in the devcontainer
+### Devcontainer
+
+Use `rg` for source and file searches, and `./mvnw` for Maven builds so the project
+wrapper controls the Maven version. Python and Node are available for small, focused
+scripts; do not add dependencies for one-off checks. `gh` is available for GitHub CLI
+work when authenticated. Docker and Oracle client tools are not installed in the
+devcontainer: run Compose operations on the host, and do not assume `sqlplus` is available.
 
 The Compose services are reachable from the devcontainer through their Compose service names:
 
@@ -157,16 +173,18 @@ The host port mappings from `compose.yaml` (for example, `127.0.0.1:8180` for
 Keycloak and `127.0.0.1:9990` for EAP management) are not the preferred route
 within the devcontainer; use the service names and container ports there.
 
-Run the narrowest useful check first, then the repository-level check before handoff:
+For implementation changes, run the narrowest useful Maven check first, then the
+repository-level verification:
 
 ```bash
 ./mvnw -pl <changed-module> -am test
 ./mvnw verify
 ```
 
-Every implementation change must be verified with Maven, and the relevant build and
-tests must finish successfully before handoff. Do not report an implementation as
-complete when the Maven build or tests are failing.
+Agents may run the Maven build and test commands above without asking first. They may
+perform the database setup or schema recreation defined by those normal build scripts;
+do not run separate database reset commands or scripts. Do not report implementation
+work as complete while a required build or test is failing.
 
 For packaging changes also run:
 
@@ -174,9 +192,16 @@ For packaging changes also run:
 ./mvnw -pl bundle/ear -am package
 ```
 
-Use `./mvnw -s .mvn/settings.xml -pl bundle/ear -am -Pdeploy-eap install` only when a running local EAP stack and
-valid local credentials are available. Do not start containers, deploy, reset Oracle, or
-run `docker compose down -v` unless the task requires it; `down -v` destroys local data.
+For changes that need runtime verification, deploy to the running local EAP stack:
+
+```bash
+./mvnw -s .mvn/settings.xml -pl bundle/ear -am -Pdeploy-eap install
+```
+
+Do not start, stop, or recreate Compose services, run separate database reset operations,
+or change Oracle data or persistent volumes unless explicitly requested. Deployment to
+the already-running EAP stack using the command above is allowed for verification.
+Compose operations must be run on the host because Docker is unavailable in the devcontainer.
 
 If a check cannot be run, report exactly which command was skipped or failed and why.
 Do not claim verification from code inspection alone.

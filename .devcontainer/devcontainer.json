@@ -1,6 +1,9 @@
 {
   "name": "itz development",
-  "dockerComposeFile": ["../compose.yaml", "../compose.dev.yaml"],
+  "dockerComposeFile": [
+    "../compose.yaml",
+    "../compose.dev.yaml"
+  ],
   "service": "dev",
   "workspaceFolder": "/workspaces/itz",
   "shutdownAction": "none",
@@ -10,7 +13,13 @@
       "version": "21",
       "jdkDistro": "tem",
       "installMaven": true,
-      "mavenVersion": "3.9.11"
+      "mavenVersion": "3.9.16"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.14"
+    },
+    "ghcr.io/devcontainers/features/node:2": {
+      "version": "24"
     },
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/common-utils:2": {
@@ -27,8 +36,10 @@
         "redhat.vscode-xml",
         "vmware.vscode-boot-dev-pack",
         "humao.rest-client",
-        "openai.chatgpt"
+        "openai.chatgpt",
+        "dbaeumer.vscode-eslint"
       ]
     }
-  }
+  },
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y ripgrep jq curl unzip && mkdir -p ~/.m2 ~/.npm ~/.cache"
 }

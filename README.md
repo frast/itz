@@ -585,3 +585,17 @@ SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) ./mvnw verify
 ## Sicherheit und Lizenzen
 
 `.env`, Oracle-Installer, erzeugte Datenbank-Images und lokale Build-Artefakte werden nicht eingecheckt. Oracle 19c darf nur im Rahmen der fuer Sie geltenden Entwicklungs-/Testlizenz verwendet werden.
+
+## Coding-Agenten
+
+`AGENTS.md` enthält die Arbeitsregeln für Coding-Agenten in diesem Repository.
+Codex kann den Skill für REST-/OpenAPI-Vertragsänderungen unter
+`.agents/skills/rest-api-contract-change/SKILL.md` bei passenden Aufgaben
+automatisch auswählen oder explizit mit
+`$rest-api-contract-change` laden.
+
+Für Änderungen, die mehrere Anwendungs-, Adapter- oder Deployment-Grenzen
+betreffen, kann Codex den read-only Subagent `architecture-reviewer` aus
+`.codex/agents/architecture-reviewer.toml` einsetzen. Bitte Codex, den
+abgeschlossenen Diff damit auf konkrete Architektur-, API-, Persistenz- und
+Test-Risiken zu prüfen.
