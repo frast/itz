@@ -1,0 +1,2 @@
+{{! Honor typeMappings for binary parts; the upstream template hard-codes InputStream and loses multipart metadata. }}
+{{#isFormParam}}{{#isDeprecated}}@Deprecated {{/isDeprecated}}@FormParam(value = "{{baseName}}") {{{dataType}}} {{paramName}}{{/isFormParam}}

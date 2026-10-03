@@ -111,6 +111,7 @@
             <configuration>
               <inputSpec>${project.basedir}/src/main/openapi/openapi.yaml</inputSpec>
               <generatorName>jaxrs-spec</generatorName>
+              <templateDirectory>${project.basedir}/src/main/openapi/templates</templateDirectory>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <apiPackage>de.itz.adapter.primary.rest.generated.api</apiPackage>
               <modelPackage>de.itz.adapter.primary.rest.generated.model</modelPackage>
@@ -135,7 +136,7 @@
                 <sourceFolder>src/main/java</sourceFolder>
                 <returnResponse>true</returnResponse>
               </configOptions>
-              <typeMappings>string+entitypart=EntityPart</typeMappings>
+              <typeMappings>string+binary=EntityPart</typeMappings>
               <importMappings>EntityPart=jakarta.ws.rs.core.EntityPart</importMappings>
             </configuration>
           </execution>

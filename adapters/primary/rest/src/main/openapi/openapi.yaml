@@ -20,7 +20,7 @@ paths:
               properties:
                 file:
                   type: string
-                  format: entitypart
+                  format: binary
                   description: >-
                     Dateiname und Content-Type muessen gueltiges Unicode enthalten und duerfen nicht leer sein.
                     Maximal 255 Unicode-Codepoints fuer den Dateinamen und 512 fuer den Content-Type einschliesslich Parametern.

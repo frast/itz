@@ -225,6 +225,13 @@ Verzeichnis `adapters/primary/rest/target/generated-sources/openapi`.
 Generierter Code wird nicht eingecheckt und nicht manuell bearbeitet. Die
 REST-Resources implementieren die generierten Interfaces und bilden explizit
 zwischen den OpenAPI-Transportmodellen und den Domain-Typen ab.
+Die Multipart-Datei ist im Vertrag standardkonform als `type: string` mit
+`format: binary` beschrieben. Der Servergenerator bildet sie auf Jakarta
+`EntityPart` ab, damit Dateiname, Content-Type und Inhaltsstream verfügbar bleiben.
+Das kleine Template `adapters/primary/rest/src/main/openapi/templates/formParams.mustache`
+verwendet dafür den konfigurierten Java-Typ; das Standardtemplate von `jaxrs-spec`
+erzwingt für Binärdateien stattdessen `InputStream`. Bei Generator-Upgrades muss
+die erzeugte Multipart-Signatur weiterhin überprüft werden.
 
 Nach einer Aenderung am Vertrag kann die Generierung gezielt ausgefuehrt werden:
 
