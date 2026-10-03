@@ -36,9 +36,9 @@ class FilesResourceTest {
         FilesResource resource = new FilesResource(new AcceptingUpload());
         InvalidContentTypeException failure = assertThrows(InvalidContentTypeException.class,
                 () -> resource.uploadFile(part(Optional.of("test.txt"), false, new MediaType("text", "*"))));
-        try (Response response = new UploadExceptionMapper().toResponse(failure)) {
+        try (Response response = new ApplicationExceptionMapper().toResponse(failure)) {
             assertEquals(400, response.getStatus());
-            assertEquals("INVALID_UPLOAD", ((ErrorResponse) response.getEntity()).getCode());
+            assertEquals("INVALID_CONTENT_TYPE", ((ErrorResponse) response.getEntity()).getCode());
         }
     }
 
@@ -54,9 +54,9 @@ class FilesResourceTest {
         MediaType oversized = new MediaType("text", "plain", Map.of("note", "a".repeat(513 - overhead)));
         InvalidContentTypeException failure = assertThrows(InvalidContentTypeException.class,
                 () -> resource.uploadFile(part(Optional.of("test.txt"), false, oversized)));
-        try (Response response = new UploadExceptionMapper().toResponse(failure)) {
+        try (Response response = new ApplicationExceptionMapper().toResponse(failure)) {
             assertEquals(400, response.getStatus());
-            assertEquals("INVALID_UPLOAD", ((ErrorResponse) response.getEntity()).getCode());
+            assertEquals("INVALID_CONTENT_TYPE", ((ErrorResponse) response.getEntity()).getCode());
         }
     }
 
@@ -68,9 +68,9 @@ class FilesResourceTest {
             EntityPart part = part(Optional.of(filename), false);
             InvalidFileNameException failure = assertThrows(InvalidFileNameException.class,
                     () -> resource.uploadFile(part));
-            try (Response response = new UploadExceptionMapper().toResponse(failure)) {
+            try (Response response = new ApplicationExceptionMapper().toResponse(failure)) {
                 assertEquals(400, response.getStatus());
-                assertEquals("INVALID_UPLOAD", ((ErrorResponse) response.getEntity()).getCode());
+                assertEquals("INVALID_FILE_NAME", ((ErrorResponse) response.getEntity()).getCode());
             }
         }
     }

@@ -11,6 +11,12 @@
   </parent>
   <artifactId>itz-rest-adapter</artifactId>
   <dependencies>
+    <!-- Production dependencies -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>itz-domain</artifactId>
@@ -18,12 +24,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>itz-usecases</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>jakarta.annotation</groupId>
@@ -41,6 +41,11 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>jakarta.validation</groupId>
       <artifactId>jakarta.validation-api</artifactId>
       <scope>provided</scope>
@@ -51,15 +56,21 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.jspecify</groupId>
-      <artifactId>jspecify</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.logging</groupId>
       <artifactId>jboss-logging</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-core-spi</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+    </dependency>
 
+    <!-- Test dependencies -->
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-core</artifactId>
@@ -67,7 +78,12 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-core-spi</artifactId>
+      <artifactId>resteasy-jackson2-provider</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-multipart-provider</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -121,8 +137,8 @@
               <generateApiDocumentation>false</generateApiDocumentation>
               <generateModelDocumentation>false</generateModelDocumentation>
               <globalProperties>
-                <apis/>
-                <models/>
+                <apis />
+                <models />
                 <supportingFiles>false</supportingFiles>
               </globalProperties>
               <configOptions>

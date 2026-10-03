@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee" version="6.0">
+    <servlet>
+        <servlet-name>api-errors</servlet-name>
+        <servlet-class>de.itz.adapter.primary.rest.ApiErrorServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>api-errors</servlet-name>
+        <url-pattern>/internal-api-error</url-pattern>
+    </servlet-mapping>
+    <error-page>
+        <location>/internal-api-error</location>
+    </error-page>
+    <filter>
+        <filter-name>upload-request-limit</filter-name>
+        <filter-class>de.itz.adapter.primary.rest.UploadRequestLimitFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>upload-request-limit</filter-name>
+        <url-pattern>/api/files</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>Protected API</web-resource-name>

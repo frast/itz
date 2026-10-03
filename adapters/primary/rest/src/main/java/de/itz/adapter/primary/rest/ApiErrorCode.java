@@ -1,0 +1,33 @@
+package de.itz.adapter.primary.rest;
+
+/** Stable public error identifiers used by the REST adapter. */
+enum ApiErrorCode {
+    BAD_REQUEST("BAD_REQUEST"),
+    UNAUTHORIZED("UNAUTHORIZED"),
+    FORBIDDEN("FORBIDDEN"),
+    NOT_FOUND("NOT_FOUND"),
+    METHOD_NOT_ALLOWED("METHOD_NOT_ALLOWED"),
+    NOT_ACCEPTABLE("NOT_ACCEPTABLE"),
+    PAYLOAD_TOO_LARGE("PAYLOAD_TOO_LARGE"),
+    UNSUPPORTED_MEDIA_TYPE("UNSUPPORTED_MEDIA_TYPE"),
+    TOO_MANY_REQUESTS("TOO_MANY_REQUESTS"),
+    SERVICE_UNAVAILABLE("SERVICE_UNAVAILABLE"),
+    INVALID_UPLOAD("INVALID_UPLOAD"),
+    INVALID_FILE_NAME("INVALID_FILE_NAME"),
+    INVALID_CONTENT_TYPE("INVALID_CONTENT_TYPE"),
+    FILE_TOO_LARGE("FILE_TOO_LARGE"),
+    FILE_INFECTED("FILE_INFECTED"),
+    UPLOAD_FAILED("UPLOAD_FAILED"),
+    REQUEST_FAILED("REQUEST_FAILED"),
+    REQUEST_REJECTED("REQUEST_REJECTED");
+
+    private final String wireValue;
+
+    ApiErrorCode(String wireValue) {
+        this.wireValue = wireValue;
+    }
+
+    String wireValue() {
+        return wireValue;
+    }
+}

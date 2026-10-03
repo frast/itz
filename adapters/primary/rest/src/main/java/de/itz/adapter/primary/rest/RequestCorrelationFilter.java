@@ -6,6 +6,7 @@ import org.jboss.logging.MDC;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.container.PreMatching;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseContext;
@@ -14,6 +15,7 @@ import jakarta.ws.rs.ext.Provider;
 
 /** Adds a bounded request identifier to the response and the EAP logging MDC. */
 @Provider
+@PreMatching
 @Priority(Priorities.HEADER_DECORATOR)
 public final class RequestCorrelationFilter implements ContainerRequestFilter, ContainerResponseFilter {
     static final String HEADER = "X-Request-ID";

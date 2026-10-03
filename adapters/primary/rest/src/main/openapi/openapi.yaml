@@ -17,9 +17,9 @@ paths:
       description: >-
         Erfordert die Rolle user. Maximal 25 MiB (26214400 Bytes) Dateiinhalt;
         die tatsächliche Größe wird beim Einlesen geprüft. Leere Dateien sind erlaubt.
-        Vorgeschaltete Container-/Multipart-Grenzen können Requests bereits vor der
-        Anwendungsprüfung abweisen. Im lokalen EAP kann ein übergroßer Request
-        deshalb eine HTML-500-Antwort statt der JSON-413-Antwort auslösen.
+        Der gesamte Multipart-Request ist auf 27 MiB begrenzt, damit Dateimetadaten
+        und Multipart-Rahmen berücksichtigt werden. EAP begrenzt den HTTP-Listener
+        zusätzlich auf 32 MiB.
         Ein erfolgreicher Upload speichert geprüften Inhalt und Metadaten.
         Der lokale Mock-Scanner erkennt nur den EICAR-Testmarker und ersetzt keinen produktiven Virenschutz.
       requestBody:
@@ -54,7 +54,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/FileResponse"
         "400":
-          description: Ungueltige Upload-Anfrage (INVALID_UPLOAD)
+          description: >-
+            Ungueltige Anfrage (BAD_REQUEST), Upload (INVALID_UPLOAD),
+            Dateiname (INVALID_FILE_NAME) oder Content-Type (INVALID_CONTENT_TYPE).
           headers:
             X-Request-ID:
               $ref: '#/components/headers/RequestId'
@@ -66,8 +68,18 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         "403":
           $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "405":
+          $ref: '#/components/responses/MethodNotAllowed'
+        "406":
+          $ref: '#/components/responses/NotAcceptable'
+        "415":
+          $ref: '#/components/responses/UnsupportedMediaType'
         "413":
-          description: Die Anwendungsprüfung erkennt mehr als 25 MiB Dateiinhalt (FILE_TOO_LARGE).
+          description: >-
+            FILE_TOO_LARGE wenn der Dateiinhalt 25 MiB überschreitet;
+            PAYLOAD_TOO_LARGE wenn der gesamte Multipart-Request 27 MiB überschreitet.
           headers:
             X-Request-ID:
               $ref: '#/components/headers/RequestId'
@@ -86,9 +98,8 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: >-
-            Anwendungsfehler als JSON: Speicherung fehlgeschlagen (UPLOAD_FAILED) oder
-            unerwarteter Fehler (REQUEST_FAILED). Fehler vor JAX-RS, etwa beim Einlesen
-            übergroßer Multipart-Requests, können von EAP als HTML ohne X-Request-ID zurückkommen.
+            Speicherung fehlgeschlagen (UPLOAD_FAILED) oder unerwarteter Fehler
+            (REQUEST_FAILED); die Nachricht enthält keine internen Fehlerdetails.
           headers:
             X-Request-ID:
               $ref: '#/components/headers/RequestId'
@@ -96,9 +107,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-            text/html:
-              schema:
-                type: string
   /ping:
     get:
       tags:
@@ -120,8 +128,16 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         "403":
           $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "405":
+          $ref: '#/components/responses/MethodNotAllowed'
+        "406":
+          $ref: '#/components/responses/NotAcceptable'
+        "415":
+          $ref: '#/components/responses/UnsupportedMediaType'
         "500":
-          description: Unerwarteter Anwendungsfehler als JSON (REQUEST_FAILED) oder Containerfehler als HTML.
+          description: Unerwarteter Fehler (REQUEST_FAILED), ohne interne Fehlerdetails.
           headers:
             X-Request-ID:
               $ref: '#/components/headers/RequestId'
@@ -129,9 +145,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-            text/html:
-              schema:
-                type: string
 components:
   securitySchemes:
     bearerAuth:
@@ -145,7 +158,7 @@ components:
         Korrelations-ID für Antworten der Anwendung. Ein gültiger X-Request-ID-Request-Header
         (1 bis 128 Zeichen aus A-Z, a-z, 0-9, Punkt, Unterstrich, Doppelpunkt und Bindestrich)
         wird übernommen; fehlende oder ungültige Werte werden durch eine UUID ersetzt.
-        Containerantworten vor den JAX-RS-Filtern garantieren diesen Header nicht.
+        Fehlerantworten innerhalb der Webanwendung enthalten diese Korrelations-ID.
       schema:
         type: string
         minLength: 1
@@ -153,21 +166,63 @@ components:
         pattern: '^[A-Za-z0-9._:-]+$'
   responses:
     Unauthorized:
-      description: >-
-        Fehlender, ungültiger oder abgelaufener Bearer-Token. EAP/OIDC antwortet vor
-        JAX-RS mit HTML, nicht mit ErrorResponse; X-Request-ID wird hier nicht garantiert.
+      description: Fehlender, ungültiger oder abgelaufener Bearer-Token.
       headers:
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
         WWW-Authenticate:
-          description: Bearer-Challenge, gegebenenfalls mit Fehlerparametern.
+          description: Generische Bearer-Challenge ohne Authentifizierungsdetails.
           schema:
             type: string
           example: Bearer
       content:
-        text/html:
+        application/json:
           schema:
-            type: string
+            $ref: '#/components/schemas/ErrorResponse'
     Forbidden:
       description: Authentifiziert, aber die erforderliche Anwendungsberechtigung fehlt (FORBIDDEN).
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Die angeforderte Ressource wurde nicht gefunden (NOT_FOUND).
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    MethodNotAllowed:
+      description: Die HTTP-Methode ist nicht erlaubt (METHOD_NOT_ALLOWED).
+      headers:
+        Allow:
+          description: Für diese Ressource erlaubte HTTP-Methoden.
+          schema:
+            type: string
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotAcceptable:
+      description: >-
+        Das angeforderte Antwortformat wird nicht unterstützt (NOT_ACCEPTABLE).
+        Fehler werden stets als JSON ausgegeben.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnsupportedMediaType:
+      description: Der Content-Type der Anfrage wird nicht unterstützt (UNSUPPORTED_MEDIA_TYPE).
       headers:
         X-Request-ID:
           $ref: '#/components/headers/RequestId'

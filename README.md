@@ -58,7 +58,7 @@ Dateipfad verwendet. Die Tabelle `uploaded_file` enthält UUID, Originaldateinam
 Content-Type, tatsächliche Bytezahl und relativen Speicherschlüssel. Der Dateiname
 ist ein Domain-Value-Object und darf höchstens 255 Unicode-Codepoints enthalten;
 leere Namen und reine Leerzeichen sind unzulässig. REST weist ungültige Namen vor
-dem Lesen des Inhalts mit HTTP 400 und `INVALID_UPLOAD` ab. Ein fehlender
+dem Lesen des Inhalts mit HTTP 400 und `INVALID_FILE_NAME` ab. Ein fehlender
 Multipart-Dateiname wird weiterhin durch `upload.bin` ersetzt. Namen werden nicht
 gekürzt oder normalisiert. `FileName` bezeichnet einen einzelnen Originaldateinamen:
 `.` und `..`, Pfadtrenner (`/`, `\`), die Sonderzeichen `< > : " | ? *`,
@@ -78,7 +78,7 @@ Die Oracle-Spalte verwendet `VARCHAR2(255 CHAR)`;
 der Content-Type wird als `VARCHAR2(512 CHAR)` gespeichert. Sein Domain-Value-Object
 begrenzt ihn auf 512 Unicode-Codepoints einschließlich Parametern. Dies ist eine
 Anwendungsgrenze, keine MIME-Standardgrenze. Ungültige Werte werden ebenfalls vor
-dem Lesen des Inhalts mit HTTP 400 und `INVALID_UPLOAD` abgewiesen. Beide
+dem Lesen des Inhalts mit HTTP 400 und `INVALID_CONTENT_TYPE` abgewiesen. Beide
 Value-Objects lehnen ungepaarte UTF-16-Surrogate ab. `ContentType` prüft zusätzlich
 die Medientyp-Syntax gemäß RFC 9110: `Typ/Subtyp` mit optionalen Parametern,
 deren Werte Tokens oder korrekt maskierte Zeichenketten in Anführungszeichen sind.
@@ -214,6 +214,17 @@ Für die Token-Anfrage müssen `ITZ_TEST_USERNAME` und `ITZ_TEST_PASSWORD` aus
 `.env.example` in die lokale `.env` übernommen werden. Diese Werte werden über
 `{{$dotenv ...}}` gelesen und nicht in `requests.http` gespeichert.
 
+Der HTTP-Fehler-Smoke-Test läuft im Dev Container mit:
+
+```bash
+node scripts/test-http-errors.mjs
+```
+
+Er prüft Status, JSON-Fehlercode, Korrelations-ID, erlaubte Protokollheader und
+Uploadgrenzen gegen EAP. Der Test lädt eine synthetische Datei mit genau 25 MiB
+hoch; dieser erfolgreiche Testupload bleibt wie ein normaler Upload in der lokalen
+Datenbank und im Dateispeicher erhalten.
+
 ## REST-API und OpenAPI
 
 Der REST-Vertrag liegt unter
@@ -235,18 +246,31 @@ die erzeugte Multipart-Signatur weiterhin überprüft werden.
 
 Der Vertrag verwendet den relativen Serverpfad `/itz/api` und verlangt für beide
 Operationen einen JWT-Bearer-Token. Uploads erfordern die Rolle `user`, Ping die
-Rolle `special` (Berechtigung `PING`). Uploads sind auf 25 MiB Dateiinhalt begrenzt.
-Anwendungsfehler verwenden JSON mit `code` und `message`: Uploads dokumentieren
-400, 403, 413, 422 und 500, Ping 403 und 500. HTTP 401 wird dagegen von EAP/OIDC
-vor JAX-RS als HTML mit `WWW-Authenticate: Bearer` erzeugt. Dafür wird weder ein
-JSON-Fehlerobjekt noch eine `X-Request-ID` zugesichert. Anwendungsantworten
-dokumentieren die Korrelations-ID als Response-Header.
-Containerfehler vor JAX-RS können auch bei HTTP 500 HTML statt JSON liefern.
-Beim lokalen Laufzeittest wurde ein Upload mit 25 MiB plus einem Byte bereits
-vor der Anwendungsprüfung mit HTML/500 abgewiesen. Die JSON/413-Antwort beschreibt
-die Größenprüfung des Speicheradapters; die vorgelagerten Multipart-/Containergrenzen
-sind damit noch nicht abgestimmt. Die 25-MiB-Anwendungsgrenze garantiert daher
-derzeit nicht, dass EAP jede Datei bis zu dieser Größe annimmt.
+Rolle `special` (Berechtigung `PING`). Die Datei ist auf 25 MiB begrenzt; der
+gesamte Multipart-Request darf höchstens 27 MiB groß sein. EAP begrenzt zusätzlich
+den HTTP-Listener auf 32 MiB. Diese letzte Grenze gilt für alle Requests an diesem
+Listener; die REST-Filter setzen die engere Upload-Grenze nur auf `/api/files`.
+Die Listener-Einstellung wird über `bundle/eap/configure-datasource.cli` gesetzt.
+Nach Änderungen an diesem Skript muss das EAP-Image auf dem Host neu gebaut werden,
+bevor ein neuer EAP-Container erstellt wird.
+
+Fehlerantworten innerhalb der Webanwendung verwenden ein festes JSON-Objekt mit
+`code` und `message`, `Content-Type: application/json`, `Cache-Control: no-store`
+und `X-Request-ID`. Die Nachrichten enthalten keine Exception- oder Providerdetails.
+Die API erhält die HTTP-Statuscodes; `Allow` bei 405 und eine generische
+`WWW-Authenticate: Bearer`-Challenge bei 401 bleiben erhalten. Auch 406-Antworten
+werden als JSON ausgegeben, selbst wenn `Accept` JSON ausschließt. Die Fehlercodes
+umfassen unter anderem `BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`,
+`METHOD_NOT_ALLOWED`, `NOT_ACCEPTABLE`, `PAYLOAD_TOO_LARGE`,
+`UNSUPPORTED_MEDIA_TYPE`, `INVALID_UPLOAD`, `INVALID_FILE_NAME`,
+`INVALID_CONTENT_TYPE`, `FILE_TOO_LARGE`, `FILE_INFECTED`, `UPLOAD_FAILED` und
+`REQUEST_FAILED`. Erfolgreiche Antworten, Redirects, 204, 304
+und automatische OPTIONS-Antworten werden nicht normalisiert.
+
+Der Servlet-Fehlerdispatch deckt Fehler innerhalb der Anwendung ab, einschließlich
+der lokal geprüften EAP/OIDC-401-Antwort. Vor der Anwendung abgewiesene Requests,
+Verbindungsabbrüche und bereits übertragene bzw. festgeschriebene Responses können
+keine einheitliche JSON-Antwort garantieren.
 
 Nach einer Aenderung am Vertrag kann die Generierung gezielt ausgefuehrt werden:
 

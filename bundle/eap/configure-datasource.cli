@@ -6,5 +6,13 @@ if (outcome != success) of /subsystem=datasources/data-source=ItzDS:read-resourc
 end-if
 if (result == false) of /core-service=management/management-interface=http-interface:read-attribute(name=console-enabled)
     /core-service=management/management-interface=http-interface:write-attribute(name=console-enabled,value=true)
+    # Apply the listener ceiling before this reload so initial setup needs only one.
+    /subsystem=undertow/server=default-server/http-listener=default:write-attribute(name=max-post-size,value=33554432)
+    :reload
+end-if
+
+# A bounded transport ceiling above the application's 27 MiB multipart request cap.
+if (result != 33554432) of /subsystem=undertow/server=default-server/http-listener=default:read-attribute(name=max-post-size)
+    /subsystem=undertow/server=default-server/http-listener=default:write-attribute(name=max-post-size,value=33554432)
     :reload
 end-if

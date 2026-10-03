@@ -32,7 +32,7 @@ Content-Type: text/plain
 This is a clean test upload.
 --itz-upload--
 
-### Ohne JWT – erwartet HTTP 401 mit HTML und WWW-Authenticate: Bearer
+### Ohne JWT – erwartet HTTP 401 mit JSON und WWW-Authenticate: Bearer
 GET {{eap}}/itz/api/ping
 
 ### Upload ohne Datei – Rolle user: HTTP 400, JSON-Code INVALID_UPLOAD
@@ -46,6 +46,6 @@ Content-Disposition: form-data; name="other"
 No file part.
 --itz-missing--
 
-### Ungültiger JWT – HTTP 401 mit HTML und Bearer-Challenge
+### Ungültiger JWT – HTTP 401 mit JSON und Bearer-Challenge
 POST {{eap}}/itz/api/files
 Authorization: Bearer invalid
