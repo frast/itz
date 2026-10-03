@@ -16,7 +16,7 @@ client_id={{clientId}}
 &password={{password}}
 &grant_type=password
 
-### Geschützten Ping mit JWT aufrufen
+### Geschützten Ping mit JWT aufrufen – Rolle special: 200, sonst 403
 GET {{eap}}/itz/api/ping
 Authorization: Bearer {{accessToken}}
 
@@ -32,5 +32,20 @@ Content-Type: text/plain
 This is a clean test upload.
 --itz-upload--
 
-### Ohne JWT – erwartet HTTP 401
+### Ohne JWT – erwartet HTTP 401 mit HTML und WWW-Authenticate: Bearer
 GET {{eap}}/itz/api/ping
+
+### Upload ohne Datei – Rolle user: HTTP 400, JSON-Code INVALID_UPLOAD
+POST {{eap}}/itz/api/files
+Authorization: Bearer {{accessToken}}
+Content-Type: multipart/form-data; boundary=itz-missing
+
+--itz-missing
+Content-Disposition: form-data; name="other"
+
+No file part.
+--itz-missing--
+
+### Ungültiger JWT – HTTP 401 mit HTML und Bearer-Challenge
+POST {{eap}}/itz/api/files
+Authorization: Bearer invalid

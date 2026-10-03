@@ -233,6 +233,21 @@ verwendet dafür den konfigurierten Java-Typ; das Standardtemplate von `jaxrs-sp
 erzwingt für Binärdateien stattdessen `InputStream`. Bei Generator-Upgrades muss
 die erzeugte Multipart-Signatur weiterhin überprüft werden.
 
+Der Vertrag verwendet den relativen Serverpfad `/itz/api` und verlangt für beide
+Operationen einen JWT-Bearer-Token. Uploads erfordern die Rolle `user`, Ping die
+Rolle `special` (Berechtigung `PING`). Uploads sind auf 25 MiB Dateiinhalt begrenzt.
+Anwendungsfehler verwenden JSON mit `code` und `message`: Uploads dokumentieren
+400, 403, 413, 422 und 500, Ping 403 und 500. HTTP 401 wird dagegen von EAP/OIDC
+vor JAX-RS als HTML mit `WWW-Authenticate: Bearer` erzeugt. Dafür wird weder ein
+JSON-Fehlerobjekt noch eine `X-Request-ID` zugesichert. Anwendungsantworten
+dokumentieren die Korrelations-ID als Response-Header.
+Containerfehler vor JAX-RS können auch bei HTTP 500 HTML statt JSON liefern.
+Beim lokalen Laufzeittest wurde ein Upload mit 25 MiB plus einem Byte bereits
+vor der Anwendungsprüfung mit HTML/500 abgewiesen. Die JSON/413-Antwort beschreibt
+die Größenprüfung des Speicheradapters; die vorgelagerten Multipart-/Containergrenzen
+sind damit noch nicht abgestimmt. Die 25-MiB-Anwendungsgrenze garantiert daher
+derzeit nicht, dass EAP jede Datei bis zu dieser Größe annimmt.
+
 Nach einer Aenderung am Vertrag kann die Generierung gezielt ausgefuehrt werden:
 
 ```bash
