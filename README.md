@@ -1,5 +1,9 @@
 # itz
 
+[![Maven CI](https://github.com/frast/itz/actions/workflows/maven.yml/badge.svg?branch=main)](https://github.com/frast/itz/actions/workflows/maven.yml)
+![Java 21](https://img.shields.io/badge/Java-21-blue)
+[![License: MIT](https://img.shields.io/github/license/frast/itz)](LICENSE)
+
 Lokale Experimentierumgebung mit Java 21, JBoss EAP 8.1, Oracle Database 19c und VS Code Dev Containers.
 
 ## Schnellstart
